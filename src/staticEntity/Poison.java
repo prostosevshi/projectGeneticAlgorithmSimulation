@@ -2,14 +2,14 @@ package staticEntity;
 
 import model.Entity;
 
-public class Rock extends Entity {
+public class Poison extends Entity {
 
     @Override
     public String getSymbol() {
-        return "R";
+        return "P";
     }
 
-    public Rock(int x, int y) {
+    public Poison(int x, int y) {
         super(x,y);
     }
 }

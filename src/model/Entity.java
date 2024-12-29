@@ -2,28 +2,16 @@ package model;
 
 public abstract class Entity {
 
-    protected String displaySymbol;
-    protected int x, y; // Position on the grid
+    private int x, y;
 
     public Entity(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    public Entity() {}
-
-    public abstract String setSymbol();
-
-    public abstract void update();
-
     //getters&setters
-    public String getDisplaySymbol() {
-        return displaySymbol;
-    }
 
-    public void setDisplaySymbol(String displaySymbol) {
-        this.displaySymbol = displaySymbol;
-    }
+    public abstract String getSymbol();
 
     public int getX() {
         return x;
@@ -38,6 +26,11 @@ public abstract class Entity {
     }
 
     public void setY(int y) {
+        this.y = y;
+    }
+
+    public void setPosition(int x, int y) {
+        this.x = x;
         this.y = y;
     }
 }
