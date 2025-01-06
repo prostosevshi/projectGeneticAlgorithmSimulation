@@ -8,41 +8,13 @@ import java.util.Random;
 public class Creature extends Entity {
 
     protected int health;
-    private double[] genome;
-    private Random random = new Random();
+    private int[][] genome;
+    private int i,j = 0;
 
-    public Creature(int x, int y, double[] genome) {
+    public Creature(int x, int y, int[][] genome) {
         super(x, y);
         this.health = 10;
         this.genome = genome;
-    }
-
-    public void makeMove(WorldMap worldMap) {
-        this.health -= 1;
-        if (health <= 0) {
-            worldMap.removeEntity(worldMap.getEntityAt(this.getX(), this.getY()));
-            return;
-        }
-
-        double action = random.nextDouble();
-        if (action < genome[0]) {
-            moveTowardsFood(worldMap);
-        } else if (action < genome[0] + genome[1]) {
-            convertPoison(worldMap);
-        } else {
-            moveRandomly(worldMap);
-        }
-    }
-
-    private void moveRandomly(WorldMap worldMap) {
-    }
-
-    private void convertPoison(WorldMap worldMap) {
-        
-    }
-
-    private void moveTowardsFood(WorldMap worldMap) {
-        
     }
 
     @Override
@@ -60,7 +32,23 @@ public class Creature extends Entity {
         this.health += delta;
     }
 
-    public double[] getGenome() {
+    public int[][] getGenome() {
         return genome;
+    }
+
+    public int getI() {
+        return i;
+    }
+
+    public int getJ() {
+        return j;
+    }
+
+    public void setI(int i) {
+        this.i = i;
+    }
+
+    public void setJ(int j) {
+        this.j = j;
     }
 }

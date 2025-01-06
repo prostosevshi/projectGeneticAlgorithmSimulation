@@ -8,58 +8,195 @@ import staticEntity.Poison;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Simulation {
 
+    private static final Logger logger = Logger.getLogger(Simulation.class.getName());
     private final WorldMap worldMap;
     private int turnCounter = 0;
+    private int numberOfFood, numberOfPoison, numberOfCreatures;
+    private List<Entity> entitiesToRemove = new ArrayList<>();
 
     public Simulation(int mapWidth, int mapHeight) {
         this.worldMap = new WorldMap(mapWidth, mapHeight);
-        initializeMap();
+        //initializeMap();
     }
 
     private void initializeMap() {
         Random random = new Random();
 
-        initializeFoodAndPoison();
-
-        // Добавляем существ
-        for (int i = 0; i < 5; i++) {
-            int x = random.nextInt(worldMap.getWidth());
-            int y = random.nextInt(worldMap.getHeight());
-            double[] genome = {Math.random(), Math.random(), Math.random()};
-            worldMap.addEntity(new Creature(x, y, genome));
-        }
+        initializeFoodAndPoison(random, numberOfFood, numberOfPoison);
+        initializeCreatures(random, numberOfCreatures);
     }
 
     private void nextTurn() {
         turnCounter++;
-        System.out.println("Turn " + turnCounter);
+        logger.info("Turn " + turnCounter);
 
         List<Entity> currentEntities = new ArrayList<>(worldMap.getEntities());
 
-        List<Entity> entitiesToRemove = new ArrayList<>();
-
-        // Все существа делают ход
         for (Entity entity : currentEntities) {
             if (entity instanceof Creature creature) {
-                moveCreature(creature);
-                interact(creature, entitiesToRemove);
+                decideEverything(creature);
+
+                creature.changeHealth(-1);
             }
         }
-
-        removeDeadCreatures();
 
         for (Entity entity : entitiesToRemove) {
             worldMap.removeEntity(entity);
         }
 
+        removeDeadCreatures();
+
         worldMap.render();
 
-        // Проверка на вымирание
         if (allCreaturesDead()) {
-            evolveOnExtinction();
+            //evolveOnExtinction();
+        }
+    }
+
+    public void makeCatch(Creature creature, int direction) {
+
+        int newX = creature.getX();
+        int newY = creature.getY();
+
+        switch (direction) {
+            case 8:
+                newX -= 1;
+                newY -= 1;
+                break; // Влево вверх
+            case 9:
+                newY -= 1;
+                break; // Вверх
+            case 10:
+                newY -= 1;
+                newX += 1;
+                break; // Вверх вправо
+            case 11:
+                newX += 1;
+                break; // Вправо
+            case 12:
+                newY += 1;
+                newX += 1;
+                break; // Вниз вправо
+            case 13:
+                newY += 1;
+                break; // Вниз
+            case 14:
+                newY += 1;
+                newX -= 1;
+                break; // Вниз влево
+            case 15:
+                newX -= 1;
+                break; // Влево
+        }
+
+        if (worldMap.getEntityAt(newX, newY) instanceof Food) {
+            creature.changeHealth(10);
+            entitiesToRemove.add(worldMap.getEntityAt(newX, newY));
+            logger.info("Creature ate food. Health increased.");
+        } else if (worldMap.getEntityAt(newX, newY) instanceof Poison) {
+            entitiesToRemove.add(worldMap.getEntityAt(newX, newY));
+            worldMap.addEntity(new Food(newX, newY));
+            logger.info("Creature encountered poison. Health decreased.");
+        }
+    }
+
+    private void moveCreature(Creature creature, int direction) {
+
+        int newX = creature.getX();
+        int newY = creature.getY();
+
+        switch (direction) {
+            case 0:
+                newX -= 1;
+                newY -= 1;
+                break; // Влево вверх
+            case 1:
+                newY -= 1;
+                break; // Вверх
+            case 2:
+                newY -= 1;
+                newX += 1;
+                break; // Вверх вправо
+            case 3:
+                newX += 1;
+                break; // Вправо
+            case 4:
+                newY += 1;
+                newX += 1;
+                break; // Вниз вправо
+            case 5:
+                newY += 1;
+                break; // Вниз
+            case 6:
+                newY += 1;
+                newX -= 1;
+                break; // Вниз влево
+            case 7:
+                newX -= 1;
+                break; // Влево
+        }
+
+        if (newX >= 0 && newX < worldMap.getWidth() && newY >= 0 && newY < worldMap.getHeight()) {
+            interact(creature, worldMap.getEntityAt(newX, newY));
+            creature.setPosition(newX, newY);
+        }
+    }
+
+    public void decideEverything(Creature creature) {
+        int[][] genome = creature.getGenome();
+
+        for (int i = creature.getI(); i < genome.length; i++) {
+            for (int j = creature.getJ(); j < genome[i].length; j++) {
+                creature.setI(i);
+                creature.setJ(j);
+                if (genome[i][j] >= 0 && genome[i][j] <= 7) {
+                    moveCreature(creature, genome[i][j]);
+                    logger.info("Creature moved.");
+                    if (j == 7) {
+                        creature.setI(i + 1);
+                        creature.setJ(0);
+                    } else
+                        creature.setJ(j + 1);
+                    return;
+                }
+
+                if (genome[i][j] >= 8 && genome[i][j] <= 15) {
+                    makeCatch(creature, genome[i][j]);
+                    logger.info("Creature tried to interact.");
+                    if (j == 7) {
+                        creature.setI(i + 1);
+                    } else
+                        creature.setJ(j + 1);
+                    return;
+                }
+                if (genome[i][j] > 15) {
+                    genome[i][j] += genome[i][j];
+                    if (genome[i][j] >= 63) {
+                        genome[i][j] -= 63;
+                    }
+                }
+
+                if (j == 7)
+                    creature.setJ(0);
+            }
+        }
+    }
+
+    private void interact(Creature creature, Entity entity) {
+
+        if (entity instanceof Poison) {
+            creature.changeHealth(-10);
+            entitiesToRemove.add(entity);
+        }
+
+        if (entity instanceof Food) {
+            creature.changeHealth(10);
+            entitiesToRemove.add(entity);
         }
     }
 
@@ -67,28 +204,48 @@ public class Simulation {
         return worldMap.getEntities().stream().noneMatch(e -> e instanceof Creature);
     }
 
-    private void moveCreature(Creature creature) {
+    private void removeDeadCreatures() {
+        List<Entity> toRemove = new ArrayList<>();
+        for (Entity entity : worldMap.getEntities()) {
+            if (entity instanceof Creature creature && creature.getHealth() <= 0) {
+                toRemove.add(entity);
+                logger.info("Creature died.");
+            }
+        }
+        worldMap.getEntities().removeAll(toRemove);
+    }
+
+    /*private void evolveOnExtinction() {
+        logger.info("All creatures are dead. Evolving new creatures!");
+
         Random random = new Random();
-        int newX = creature.getX() + random.nextInt(3) - 1;
-        int newY = creature.getY() + random.nextInt(3) - 1;
+        int newPopulationSize = numberOfCreatures;
+        double mutationRate = 0.1;
 
-        // Проверяем границы карты
-        if (newX >= 0 && newX < worldMap.getWidth() && newY >= 0 && newY < worldMap.getHeight()) {
-            creature.setPosition(newX, newY);
-        }
-    }
+        List<Creature> topCreatures = selectTopCreatures(numberOfCreatures / 3);
 
-    private void interact(Creature creature, List<Entity> entitiesToRemove) {
-        Entity entity = worldMap.getEntityAt(creature.getX(), creature.getY());
-        if (entity instanceof Food) {
-            creature.changeHealth(10);
-            entitiesToRemove.add(entity);
-        } else if (entity instanceof Poison) {
-            creature.changeHealth(-10);
-            entitiesToRemove.add(entity);
+        // Clear the map and spawn new creatures
+        worldMap.getEntities().clear();
+
+        for (int i = 0; i < newPopulationSize; i++) {
+            double[] genome;
+            if (!topCreatures.isEmpty()) {
+                Creature parent1 = topCreatures.get(random.nextInt(topCreatures.size()));
+                Creature parent2 = topCreatures.get(random.nextInt(topCreatures.size()));
+                genome = Mutation.crossover(parent1.getGenome(), parent2.getGenome());
+                //genome = Mutation.mutate(genome, mutationRate);
+                logger.fine("Created new creature by crossover and mutation.");
+            } else {
+                genome = createRandomGenome();
+            }
+
+            int x = random.nextInt(worldMap.getWidth());
+            int y = random.nextInt(worldMap.getHeight());
+            worldMap.addEntity(new Creature(x, y, genome));
         }
-        creature.changeHealth(-1); // Теряет здоровье каждый ход
-    }
+
+        initializeFoodAndPoison(random, numberOfFood, numberOfPoison);
+    }*/
 
     private List<Creature> selectTopCreatures(int topN) {
         return worldMap.getEntities().stream()
@@ -99,110 +256,67 @@ public class Simulation {
                 .toList();
     }
 
-    private double[] crossover(double[] genome1, double[] genome2) {
-        double[] newGenome = new double[genome1.length];
-        for (int i = 0; i < genome1.length; i++) {
-            newGenome[i] = Math.random() < 0.5 ? genome1[i] : genome2[i]; // Берём ген от одного из родителей
-        }
-        return newGenome;
-    }
-
-    private double[] mutate(double[] genome, double mutationRate) {
-        Random random = new Random();
-        for (int i = 0; i < genome.length; i++) {
-            if (random.nextDouble() < mutationRate) {
-                genome[i] += random.nextGaussian() * 0.1; // Небольшое случайное изменение
-            }
-        }
-        return genome;
-    }
-
-    private void evolveOnExtinction() {
-        System.out.println("Все существа вымерли. Начинается эволюция!");
-        Random random = new Random();
-
-        int newPopulationSize = 5; // Размер новой популяции
-        double mutationRate = 0.1;  // Шанс мутации
-
-        // Отбираем лучших из вымершей популяции (если есть выжившие к моменту вызова)
-        List<Creature> topCreatures = selectTopCreatures(2);
-
-        // Удаляем все существа и объекты
-        worldMap.getEntities().clear();
-
-        // Создаем новое поколение
-        for (int i = 0; i < newPopulationSize; i++) {
-            double[] genome;
-            if (!topCreatures.isEmpty()) {
-                // Кроссовер и мутация на основе лучших геномов
-                Creature parent1 = topCreatures.get(random.nextInt(topCreatures.size()));
-                Creature parent2 = topCreatures.get(random.nextInt(topCreatures.size()));
-                genome = mutate(crossover(parent1.getGenome(), parent2.getGenome()), mutationRate);
-            } else {
-                // Если никого не осталось, создаем случайные геномы
-                genome = createRandomGenome();
-            }
-
-            int x = random.nextInt(worldMap.getWidth());
-            int y = random.nextInt(worldMap.getHeight());
-            worldMap.addEntity(new Creature(x, y, genome));
-        }
-
-        // Возвращаем еду и яд
-        initializeFoodAndPoison();
-    }
-
     private double[] createRandomGenome() {
         Random random = new Random();
-        double[] genome = new double[5]; // Размер генома
+        double[] genome = new double[5]; // Genome size
         for (int i = 0; i < genome.length; i++) {
-            genome[i] = random.nextDouble(); // Ген от 0 до 1
+            genome[i] = random.nextDouble(); // Gene between 0 and 1
         }
         return genome;
     }
 
-    private void initializeFoodAndPoison() {
-        Random random = new Random();
-
-        for (int i = 0; i < 3; i++) {
+    private void initializeFoodAndPoison(Random random, int numberOfFood, int numberOfPoison) {
+        for (int i = 0; i < numberOfFood; i++) {
             int x = random.nextInt(worldMap.getWidth());
             int y = random.nextInt(worldMap.getHeight());
             worldMap.addEntity(new Food(x, y));
         }
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < numberOfPoison; i++) {
             int x = random.nextInt(worldMap.getWidth());
             int y = random.nextInt(worldMap.getHeight());
             worldMap.addEntity(new Poison(x, y));
         }
     }
 
-    private void removeDeadCreatures() {
-        List<Entity> toRemove = new ArrayList<>();
-        for (Entity entity : worldMap.getEntities()) {
-            if (entity instanceof Creature creature && creature.getHealth() <= 0) {
-                toRemove.add(entity);
+    private void initializeCreatures(Random random, int numberOfCreatures) {
+        for (int i = 0; i < numberOfCreatures; i++) {
+            int x = random.nextInt(worldMap.getWidth());
+            int y = random.nextInt(worldMap.getHeight());
+            int[][] genome = new int[8][8];
+            for (int k = 0; k < 8; k++) {
+                for (int j = 0; j < 8; j++) {
+                    genome[k][j] = random.nextInt(64);  // Генерируем случайное число от 0 до 63
+                }
             }
+            worldMap.addEntity(new Creature(x, y, genome));
         }
-        worldMap.getEntities().removeAll(toRemove);
     }
 
     public void start() {
-        System.out.println("Starting simulation...");
+        logger.info("Starting simulation...");
+        worldMap.render();
         while (true) {
             nextTurn();
 
             try {
-                Thread.sleep(100); // 1000 миллисекунд = 1 секунда
+                Thread.sleep(2000); // 1000 миллисекунд = 1 секунда
             } catch (InterruptedException e) {
-                System.err.println("Simulation interrupted: " + e.getMessage());
+                logger.log(Level.SEVERE, "Simulation interrupted: " + e.getMessage(), e);
                 Thread.currentThread().interrupt();
             }
 
-            // Если все существа вымерли, производим эволюцию
+            /*// Если все существа вымерли, производим эволюцию
             if (allCreaturesDead()) {
-                evolveOnExtinction();
-            }
+                //evolveOnExtinction();
+            }*/
         }
+    }
+
+    public void setParameters(int numberOfFood, int numberOfPoison, int numberOfCreatures) {
+        this.numberOfCreatures = numberOfCreatures;
+        this.numberOfFood = numberOfFood;
+        this.numberOfPoison = numberOfPoison;
+        initializeMap();
     }
 }
