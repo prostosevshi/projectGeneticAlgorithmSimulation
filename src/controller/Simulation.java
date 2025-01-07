@@ -16,6 +16,7 @@ public class Simulation {
     private static final Logger logger = Logger.getLogger(Simulation.class.getName());
     private final WorldMap worldMap;
     private int turnCounter = 0;
+    private int genCounter = 1;
     private int numberOfFood, numberOfPoison, numberOfCreatures;
     private List<Entity> entitiesToRemove = new ArrayList<>();
 
@@ -33,7 +34,8 @@ public class Simulation {
 
     private void nextTurn() {
         turnCounter++;
-        logger.info("Turn " + turnCounter);
+        //logger.info("Turn " + turnCounter);
+        System.out.println("Turn " + turnCounter);
 
         List<Entity> currentEntities = new ArrayList<>(worldMap.getEntities());
 
@@ -51,14 +53,23 @@ public class Simulation {
 
         removeDeadCreatures();
 
+        for (Entity entity : currentEntities) {
+            if (entity instanceof Creature creature) {
+                creature.setLifetime(creature.getLifetime() + 1);
+            }
+        }
+
         worldMap.render();
 
         if (allCreaturesDead()) {
-            //evolveOnExtinction();
+            evolveOnExtinction();
+            turnCounter = 0;
+
+            logger.info("All creatures are dead. Generation " + (genCounter += 1) + " begins.");
         }
     }
 
-    public void makeCatch(Creature creature, int direction) {
+    public void interact(Creature creature, int direction) {
 
         int newX = creature.getX();
         int newY = creature.getY();
@@ -97,11 +108,13 @@ public class Simulation {
         if (worldMap.getEntityAt(newX, newY) instanceof Food) {
             creature.changeHealth(10);
             entitiesToRemove.add(worldMap.getEntityAt(newX, newY));
-            logger.info("Creature ate food. Health increased.");
+            //logger.info("Creature ate food. Health increased.");
+            System.out.println("creature " + creature.toString() + " ate food");
         } else if (worldMap.getEntityAt(newX, newY) instanceof Poison) {
             entitiesToRemove.add(worldMap.getEntityAt(newX, newY));
             worldMap.addEntity(new Food(newX, newY));
-            logger.info("Creature encountered poison. Health decreased.");
+            System.out.println("creature " + creature.toString() + " converted poison to food");
+            //logger.info("Creature encountered poison. Health decreased.");
         }
     }
 
@@ -142,8 +155,7 @@ public class Simulation {
         }
 
         if (newX >= 0 && newX < worldMap.getWidth() && newY >= 0 && newY < worldMap.getHeight()) {
-            interact(creature, worldMap.getEntityAt(newX, newY));
-            creature.setPosition(newX, newY);
+            encounter(creature, worldMap.getEntityAt(newX, newY), newX, newY);
         }
     }
 
@@ -156,7 +168,8 @@ public class Simulation {
                 creature.setJ(j);
                 if (genome[i][j] >= 0 && genome[i][j] <= 7) {
                     moveCreature(creature, genome[i][j]);
-                    logger.info("Creature moved.");
+                    //logger.info("Creature moved.");
+                    System.out.println("creature " + creature.toString() + " moved");
                     if (j == 7) {
                         creature.setI(i + 1);
                         creature.setJ(0);
@@ -166,8 +179,9 @@ public class Simulation {
                 }
 
                 if (genome[i][j] >= 8 && genome[i][j] <= 15) {
-                    makeCatch(creature, genome[i][j]);
-                    logger.info("Creature tried to interact.");
+                    interact(creature, genome[i][j]);
+                    //logger.info("Creature tried to interact.");
+                    System.out.println("creature " + creature.toString() + " tried to interact");
                     if (j == 7) {
                         creature.setI(i + 1);
                     } else
@@ -187,16 +201,22 @@ public class Simulation {
         }
     }
 
-    private void interact(Creature creature, Entity entity) {
+    private void encounter(Creature creature, Entity entity, int newX, int newY) {
 
         if (entity instanceof Poison) {
             creature.changeHealth(-10);
             entitiesToRemove.add(entity);
+            creature.setPosition(newX, newY);
         }
 
         if (entity instanceof Food) {
             creature.changeHealth(10);
             entitiesToRemove.add(entity);
+            creature.setPosition(newX, newY);
+        }
+
+        if (entity instanceof Creature) {
+
         }
     }
 
@@ -215,74 +235,72 @@ public class Simulation {
         worldMap.getEntities().removeAll(toRemove);
     }
 
-    /*private void evolveOnExtinction() {
-        logger.info("All creatures are dead. Evolving new creatures!");
+    private void evolveOnExtinction() {
 
         Random random = new Random();
         int newPopulationSize = numberOfCreatures;
-        double mutationRate = 0.1;
 
-        List<Creature> topCreatures = selectTopCreatures(numberOfCreatures / 3);
+        List<Creature> topCreatures = selectTopCreatures(2);
 
         // Clear the map and spawn new creatures
         worldMap.getEntities().clear();
 
-        for (int i = 0; i < newPopulationSize; i++) {
-            double[] genome;
-            if (!topCreatures.isEmpty()) {
-                Creature parent1 = topCreatures.get(random.nextInt(topCreatures.size()));
-                Creature parent2 = topCreatures.get(random.nextInt(topCreatures.size()));
-                genome = Mutation.crossover(parent1.getGenome(), parent2.getGenome());
-                //genome = Mutation.mutate(genome, mutationRate);
-                logger.fine("Created new creature by crossover and mutation.");
-            } else {
-                genome = createRandomGenome();
-            }
-
-            int x = random.nextInt(worldMap.getWidth());
-            int y = random.nextInt(worldMap.getHeight());
-            worldMap.addEntity(new Creature(x, y, genome));
+        for (Creature creature : topCreatures) {
+            creature.changeHealth(10);
+            placeCreatureOnMap(creature, random);
+            worldMap.addEntity(creature);
         }
 
+        initializeCreatures(random, (newPopulationSize - topCreatures.size()));
         initializeFoodAndPoison(random, numberOfFood, numberOfPoison);
-    }*/
+    }
+
+    private void placeCreatureOnMap(Creature creature, Random random) {
+        int x, y;
+        do {
+            x = random.nextInt(worldMap.getWidth());
+            y = random.nextInt(worldMap.getHeight());
+        } while (worldMap.getEntityAt(x, y) != null);
+
+        creature.setPosition(x, y);
+    }
 
     private List<Creature> selectTopCreatures(int topN) {
         return worldMap.getEntities().stream()
                 .filter(e -> e instanceof Creature)
                 .map(e -> (Creature) e)
-                .sorted((c1, c2) -> Integer.compare(c2.getHealth(), c1.getHealth()))
+                .sorted((c1, c2) -> Integer.compare(c2.getLifetime(), c1.getLifetime()))
                 .limit(topN)
                 .toList();
     }
 
-    private double[] createRandomGenome() {
-        Random random = new Random();
-        double[] genome = new double[5]; // Genome size
-        for (int i = 0; i < genome.length; i++) {
-            genome[i] = random.nextDouble(); // Gene between 0 and 1
-        }
-        return genome;
-    }
-
     private void initializeFoodAndPoison(Random random, int numberOfFood, int numberOfPoison) {
         for (int i = 0; i < numberOfFood; i++) {
-            int x = random.nextInt(worldMap.getWidth());
-            int y = random.nextInt(worldMap.getHeight());
+            int x, y;
+            do {
+                x = random.nextInt(worldMap.getWidth());
+                y = random.nextInt(worldMap.getHeight());
+            } while (worldMap.getEntityAt(x, y) != null);
             worldMap.addEntity(new Food(x, y));
         }
 
         for (int i = 0; i < numberOfPoison; i++) {
-            int x = random.nextInt(worldMap.getWidth());
-            int y = random.nextInt(worldMap.getHeight());
+            int x, y;
+            do {
+                x = random.nextInt(worldMap.getWidth());
+                y = random.nextInt(worldMap.getHeight());
+            } while (worldMap.getEntityAt(x, y) != null);
             worldMap.addEntity(new Poison(x, y));
         }
     }
 
     private void initializeCreatures(Random random, int numberOfCreatures) {
         for (int i = 0; i < numberOfCreatures; i++) {
-            int x = random.nextInt(worldMap.getWidth());
-            int y = random.nextInt(worldMap.getHeight());
+            int x, y;
+            do {
+                x = random.nextInt(worldMap.getWidth());
+                y = random.nextInt(worldMap.getHeight());
+            } while (worldMap.getEntityAt(x, y) != null);
             int[][] genome = new int[8][8];
             for (int k = 0; k < 8; k++) {
                 for (int j = 0; j < 8; j++) {
@@ -295,7 +313,7 @@ public class Simulation {
 
     public void start() {
         logger.info("Starting simulation...");
-        worldMap.render();
+        //worldMap.render();
         while (true) {
             nextTurn();
 
@@ -306,8 +324,7 @@ public class Simulation {
                 Thread.currentThread().interrupt();
             }
 
-            /*// Если все существа вымерли, производим эволюцию
-            if (allCreaturesDead()) {
+            /*if (allCreaturesDead()) {
                 //evolveOnExtinction();
             }*/
         }

@@ -10,6 +10,7 @@ public class Creature extends Entity {
     protected int health;
     private int[][] genome;
     private int i,j = 0;
+    private int lifetime = 0;
 
     public Creature(int x, int y, int[][] genome) {
         super(x, y);
@@ -50,5 +51,13 @@ public class Creature extends Entity {
 
     public void setJ(int j) {
         this.j = j;
+    }
+
+    public int getLifetime() {
+        return lifetime;
+    }
+
+    public void setLifetime(int lifetime) {
+        this.lifetime = lifetime;
     }
 }
