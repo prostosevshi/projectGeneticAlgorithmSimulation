@@ -37,6 +37,8 @@ public class Simulation {
         //logger.info("Turn " + turnCounter);
         System.out.println("Turn " + turnCounter);
 
+        worldMap.render();
+
         List<Entity> currentEntities = new ArrayList<>(worldMap.getEntities());
 
         for (Entity entity : currentEntities) {
@@ -53,13 +55,15 @@ public class Simulation {
 
         removeDeadCreatures();
 
+        checkAndAddFood();
+
         for (Entity entity : currentEntities) {
             if (entity instanceof Creature creature) {
                 creature.setLifetime(creature.getLifetime() + 1);
             }
         }
 
-        worldMap.render();
+        //worldMap.render();
 
         if (allCreaturesDead()) {
             evolveOnExtinction();
@@ -68,6 +72,15 @@ public class Simulation {
             logger.info("All creatures are dead. Generation " + (genCounter += 1) + " begins.");
         }
     }
+
+    public void checkAndAddFood() {
+        boolean foodExists = worldMap.getEntities().stream().anyMatch(entity -> entity instanceof Food);
+
+        if (!foodExists) {
+            initializeFoodAndPoison(new Random(), 1, 0);
+        }
+    }
+
 
     public void interact(Creature creature, int direction) {
 
@@ -109,11 +122,11 @@ public class Simulation {
             creature.changeHealth(10);
             entitiesToRemove.add(worldMap.getEntityAt(newX, newY));
             //logger.info("Creature ate food. Health increased.");
-            System.out.println("creature " + creature.toString() + " ate food");
+            //System.out.println("creature " + creature.toString() + " ate food");
         } else if (worldMap.getEntityAt(newX, newY) instanceof Poison) {
             entitiesToRemove.add(worldMap.getEntityAt(newX, newY));
             worldMap.addEntity(new Food(newX, newY));
-            System.out.println("creature " + creature.toString() + " converted poison to food");
+            //.out.println("creature " + creature.toString() + " converted poison to food");
             //logger.info("Creature encountered poison. Health decreased.");
         }
     }
@@ -169,7 +182,7 @@ public class Simulation {
                 if (genome[i][j] >= 0 && genome[i][j] <= 7) {
                     moveCreature(creature, genome[i][j]);
                     //logger.info("Creature moved.");
-                    System.out.println("creature " + creature.toString() + " moved");
+                    //System.out.println("creature " + creature.toString() + " moved");
                     if (j == 7) {
                         creature.setI(i + 1);
                         creature.setJ(0);
@@ -181,7 +194,7 @@ public class Simulation {
                 if (genome[i][j] >= 8 && genome[i][j] <= 15) {
                     interact(creature, genome[i][j]);
                     //logger.info("Creature tried to interact.");
-                    System.out.println("creature " + creature.toString() + " tried to interact");
+                    //System.out.println("creature " + creature.toString() + " tried to interact");
                     if (j == 7) {
                         creature.setI(i + 1);
                     } else
@@ -197,6 +210,9 @@ public class Simulation {
 
                 if (j == 7)
                     creature.setJ(0);
+
+                if (i == 7)
+                    creature.setI(0);
             }
         }
     }
@@ -207,16 +223,22 @@ public class Simulation {
             creature.changeHealth(-10);
             entitiesToRemove.add(entity);
             creature.setPosition(newX, newY);
+            return;
         }
 
         if (entity instanceof Food) {
             creature.changeHealth(10);
             entitiesToRemove.add(entity);
             creature.setPosition(newX, newY);
+            return;
         }
 
         if (entity instanceof Creature) {
-
+            if (creature.toString().equals(entity.toString())) {
+                creature.setPosition(newX, newY);
+            }
+        } else {
+            creature.setPosition(newX, newY);
         }
     }
 
@@ -229,7 +251,7 @@ public class Simulation {
         for (Entity entity : worldMap.getEntities()) {
             if (entity instanceof Creature creature && creature.getHealth() <= 0) {
                 toRemove.add(entity);
-                logger.info("Creature died.");
+                //logger.info("Creature died.");
             }
         }
         worldMap.getEntities().removeAll(toRemove);
@@ -240,7 +262,7 @@ public class Simulation {
         Random random = new Random();
         int newPopulationSize = numberOfCreatures;
 
-        List<Creature> topCreatures = selectTopCreatures(2);
+        List<Creature> topCreatures = selectTopCreatures(numberOfCreatures/5);
 
         // Clear the map and spawn new creatures
         worldMap.getEntities().clear();
@@ -318,7 +340,7 @@ public class Simulation {
             nextTurn();
 
             try {
-                Thread.sleep(2000); // 1000 миллисекунд = 1 секунда
+                Thread.sleep(500); // 1000 миллисекунд = 1 секунда
             } catch (InterruptedException e) {
                 logger.log(Level.SEVERE, "Simulation interrupted: " + e.getMessage(), e);
                 Thread.currentThread().interrupt();
