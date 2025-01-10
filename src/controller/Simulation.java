@@ -35,7 +35,7 @@ public class Simulation {
     private void nextTurn() {
         turnCounter++;
         //logger.info("Turn " + turnCounter);
-        System.out.println("Turn " + turnCounter);
+        System.out.println("Turn: " + turnCounter + " Top creatures lifetime: " + selectTopCreatures(1).getFirst().getLifetime());
 
         worldMap.render();
 
@@ -55,7 +55,7 @@ public class Simulation {
 
         removeDeadCreatures();
 
-        checkAndAddFood();
+        addFoodAndPoison();
 
         for (Entity entity : currentEntities) {
             if (entity instanceof Creature creature) {
@@ -73,11 +73,19 @@ public class Simulation {
         }
     }
 
-    public void checkAndAddFood() {
-        boolean foodExists = worldMap.getEntities().stream().anyMatch(entity -> entity instanceof Food);
+    public void addFoodAndPoison() {
+        long poisonCount = worldMap.getEntities().stream().filter(entity -> entity instanceof Poison).count();
+        long foodCount = worldMap.getEntities().stream().filter(entity -> entity instanceof Food).count();
+        long creatureCount = worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count();
 
-        if (!foodExists) {
-            initializeFoodAndPoison(new Random(), 1, 0);
+        if (poisonCount < numberOfPoison / 2) {
+            int poisonToAdd = (int) (numberOfPoison - poisonCount) / 2;
+            initializeFoodAndPoison(new Random(), 0, poisonToAdd);
+        }
+
+        if (foodCount < numberOfFood) {
+            int foodToAdd = (int) (numberOfFood - foodCount);
+            initializeFoodAndPoison(new Random(), foodToAdd, 0);
         }
     }
 
@@ -262,7 +270,7 @@ public class Simulation {
         Random random = new Random();
         int newPopulationSize = numberOfCreatures;
 
-        List<Creature> topCreatures = selectTopCreatures(numberOfCreatures/5);
+        List<Creature> topCreatures = selectTopCreatures(numberOfCreatures / 5);
 
         // Clear the map and spawn new creatures
         worldMap.getEntities().clear();
