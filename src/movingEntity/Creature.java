@@ -9,7 +9,7 @@ public class Creature extends Entity {
 
     protected int health;
     private int[][] genome;
-    private int i,j = 0;
+    private int i, j = 0;
     private int lifetime = 0;
 
     public Creature(int x, int y, int[][] genome) {
@@ -29,8 +29,16 @@ public class Creature extends Entity {
         return health;
     }
 
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
     public void changeHealth(int delta) {
-        this.health += delta;
+        if (getHealth() <= 70) {
+            this.health += delta;
+        } else {
+            setHealth(70);
+        }
     }
 
     public int[][] getGenome() {
