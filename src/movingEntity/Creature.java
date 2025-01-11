@@ -34,10 +34,10 @@ public class Creature extends Entity {
     }
 
     public void changeHealth(int delta) {
-        if (getHealth() <= 70) {
+        if (getHealth() <= 90) {
             this.health += delta;
         } else {
-            setHealth(70);
+            setHealth(90);
         }
     }
 
