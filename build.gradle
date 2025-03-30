@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
+}
+
+repositories {
+    mavenCentral()
+}
+
+javafx {
+    version = "21"
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+dependencies {
+    implementation 'org.openjfx:javafx-controls:24'
+    implementation 'org.openjfx:javafx-fxml:24'
+}
+
+application {
+    mainClass = 'com.example.ui.MainApp'
+    applicationDefaultJvmArgs = ['--module-path', 'C:/Program Files/Java/javafx-sdk-24/lib', '--add-modules', 'javafx.controls,javafx.fxml']
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
