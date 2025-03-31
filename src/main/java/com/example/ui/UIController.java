@@ -1,90 +1,121 @@
 package com.example.ui;
 
-import com.example.movingEntity.Creature;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-
-import java.util.List;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 
 public class UIController {
 
-    private static final int WIDTH = 600;
-    private static final int HEIGHT = 400;
-    private static final int CELL_SIZE = 20;
-    private Canvas canvas;
+    private UISimulationController uiSimulationController;
+    private GridPane gridPane;
+    private Button pauseOrResumeButton;
 
-    public UIController() {
-        this.canvas = new Canvas(WIDTH, HEIGHT);
-
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        drawGrid(gc);
+    public UIController(UISimulationController uiSimulationController) {
+        this.uiSimulationController = uiSimulationController;
+        this.gridPane = new GridPane();
+        initializeUI();
     }
 
-    public Canvas getCanvas() {
-        return canvas;
-    }
-
-    public void drawGrid(GraphicsContext gc) {
-        gc.setStroke(Color.LIGHTGRAY);
-        for (int i = 0; i < WIDTH; i += CELL_SIZE) {
-            gc.strokeLine(i, 0, i, HEIGHT);
-        }
-        for (int i = 0; i < HEIGHT; i += CELL_SIZE) {
-            gc.strokeLine(0, i, WIDTH, i);
-        }
-    }
-
-    private void drawCreatures(GraphicsContext gc, List<Creature> creatures) {
-        for (Creature creature : creatures) {
-            gc.setFill(Color.GREEN);
-            gc.fillRect(creature.getX() * CELL_SIZE, creature.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-        }
-    }
-
-    public HBox createControlButtons() {
-        HBox buttons = new HBox(10);
+    private void initializeUI() {
         Button startButton = new Button("Start");
-        Button pauseButton = new Button("Pause");
-        Button stopButton = new Button("Stop");
-        Button speedUpButton = new Button("Speed Up");
-        Button slowDownButton = new Button("Slow Down");
-        Button statsButton = new Button("Statistics");
+        startButton.setOnAction(event -> uiSimulationController.startSimulation());
 
-        startButton.setOnAction(e -> startSimulation());
-        pauseButton.setOnAction(e -> pauseSimulation());
-        stopButton.setOnAction(e -> stopSimulation());
-        speedUpButton.setOnAction(e -> speedUp());
-        slowDownButton.setOnAction(e -> slowDown());
-        statsButton.setOnAction(e -> showStatistics());
+        pauseOrResumeButton = new Button("Pause");
+        pauseOrResumeButton.setOnAction(event -> togglePause());
 
-        buttons.getChildren().addAll(startButton, pauseButton, stopButton, speedUpButton, slowDownButton, statsButton);
-        return buttons;
+        Button resetButton = new Button("Reset");
+        resetButton.setOnAction(event -> uiSimulationController.resetSimulation());
+
+        Button speedUpButton  = new Button("Speed Up ");
+        speedUpButton.setOnAction(event -> uiSimulationController.increaseSpeed());
+
+        Button slowDownButton  = new Button("Slow Down");
+        slowDownButton .setOnAction(event -> uiSimulationController.decreaseSpeed());
+
+        Button changeParametersButton = new Button("Change Parameters");
+        changeParametersButton.setOnAction(event -> showParameterDialog());
+
+        gridPane.add(startButton, 0, 0);
+        gridPane.add(pauseOrResumeButton, 1, 0);
+        gridPane.add(resetButton, 2, 0);
+        gridPane.add(speedUpButton, 3, 0);
+        gridPane.add(slowDownButton, 4, 0);
+        gridPane.add(changeParametersButton, 5, 0);
     }
 
-    private void startSimulation() {
-        System.out.println("Simulation started");
+    private void togglePause() {
+        if (uiSimulationController.getSimulation().isPaused()) {
+            uiSimulationController.pauseOrResumeSimulation();
+            pauseOrResumeButton.setText("Pause");
+        } else {
+            uiSimulationController.pauseOrResumeSimulation();
+            pauseOrResumeButton.setText("Resume");
+        }
     }
 
-    private void pauseSimulation() {
-        System.out.println("Simulation paused");
+    private void showParameterDialog() {
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Change Parameters");
+
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField widthField = new TextField();
+        widthField.setText(String.valueOf(uiSimulationController.getSimulation().getWorldMap().getWidth()));
+
+        TextField heightField = new TextField();
+        heightField.setText(String.valueOf(uiSimulationController.getSimulation().getWorldMap().getHeight()));
+
+        TextField foodField = new TextField();
+        foodField.setText(String.valueOf(uiSimulationController.getSimulation().getNumberOfFood()));
+
+        TextField poisonField = new TextField();
+        poisonField.setText(String.valueOf(uiSimulationController.getSimulation().getNumberOfPoison()));
+
+        TextField creaturesField = new TextField();
+        creaturesField.setText(String.valueOf(uiSimulationController.getSimulation().getNumberOfCreatures()));
+
+        grid.add(new Label("Map Width:"), 0, 0);
+        grid.add(widthField, 1, 0);
+
+        grid.add(new Label("Map Height:"), 0, 1);
+        grid.add(heightField, 1, 1);
+
+        grid.add(new Label("Food:"), 0, 2);
+        grid.add(foodField, 1, 2);
+
+        grid.add(new Label("Poison:"), 0, 3);
+        grid.add(poisonField, 1, 3);
+
+        grid.add(new Label("Creatures:"), 0, 4);
+        grid.add(creaturesField, 1, 4);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+
+                int width = Integer.parseInt(widthField.getText());
+                int height = Integer.parseInt(heightField.getText());
+                int food = Integer.parseInt(foodField.getText());
+                int poison = Integer.parseInt(poisonField.getText());
+                int creatures = Integer.parseInt(creaturesField.getText());
+
+                uiSimulationController.changeMapSize(width, height);
+                uiSimulationController.updateParameters(food, poison, creatures);
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
     }
 
-    private void stopSimulation() {
-        System.out.println("Simulation stopped");
-    }
-
-    private void speedUp() {
-        System.out.println("Speed increased");
-    }
-
-    private void slowDown() {
-        System.out.println("Speed decreased");
-    }
-
-    private void showStatistics() {
-        System.out.println("Showing statistics");
+    public Parent getRoot() {
+        return gridPane;
     }
 }

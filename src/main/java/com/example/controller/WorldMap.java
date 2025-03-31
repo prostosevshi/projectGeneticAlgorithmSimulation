@@ -13,8 +13,8 @@ public class WorldMap {
 
     private static final Logger logger = Logger.getLogger(WorldMap.class.getName());
 
-    private final int width;
-    private final int height;
+    private int width;
+    private int height;
 
     private final List<Entity> entities;
 
@@ -22,6 +22,11 @@ public class WorldMap {
         this.width = width;
         this.height = height;
         entities = new ArrayList<>();
+    }
+
+    public void resize(int newWidth, int newHeight) {
+        this.width = newWidth;
+        this.height = newHeight;
     }
 
     public void addEntity(Entity entity) {
@@ -86,7 +91,6 @@ public class WorldMap {
             System.out.println(" " + "+---".repeat(width) + "+");
         }
     }
-
 
     public int getWidth() {
         return width;

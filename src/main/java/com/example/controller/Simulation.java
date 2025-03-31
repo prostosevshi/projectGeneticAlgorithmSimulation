@@ -13,12 +13,13 @@ public class Simulation {
 
     private static final Logger logger = Logger.getLogger(Simulation.class.getName());
 
-    private final WorldMap worldMap;
-    private final GeneticLogic geneticLogic;
+    private WorldMap worldMap;
+    private GeneticLogic geneticLogic;
 
     private final Random random = new Random();
 
     private int numberOfFood, numberOfPoison, numberOfCreatures;
+    private int simulationSpeed = 1500;
 
     public List<Entity> creaturesOfLastGen = new ArrayList<>();
     public List<Entity> entitiesToRemove = new ArrayList<>();
@@ -27,10 +28,16 @@ public class Simulation {
     private int turnCounter = 0;
     private int genCounter = 1;
 
-    public Simulation(int mapWidth, int mapHeight) {
+    private boolean isPaused;
+
+    public Simulation() {
+        this.isPaused = false;
+        //initializeMap();
+    }
+
+    public void initializeSimulation(int mapWidth, int mapHeight) {
         this.worldMap = new WorldMap(mapWidth, mapHeight);
         this.geneticLogic = new GeneticLogic(this, worldMap);
-        //initializeMap();
     }
 
     private void initializeMap() {
@@ -38,26 +45,76 @@ public class Simulation {
         initializeCreatures(numberOfCreatures);
     }
 
+    public void updateMapSize(int newWidth, int newHeight) {
+        worldMap.resize(newWidth, newHeight);
+    }
+
     public void start() {
         logger.info("Starting simulation...");
         //worldMap.render();
-        while (true) {
+        while (!isPaused) {
+
             nextTurn();
             /*if (genCounter == 20000) {
                 System.out.println(statMap);
                 break;
             }*/
             try {
-                Thread.sleep(1500); // 1000 миллисекунд = 1 секунда
+                Thread.sleep(simulationSpeed); // 1000 миллисекунд = 1 секунда
             } catch (InterruptedException e) {
                 logger.log(Level.SEVERE, "Simulation interrupted: " + e.getMessage(), e);
                 Thread.currentThread().interrupt();
             }
-
-            /*if (allCreaturesDead()) {
-                //evolveOnExtinction();
-            }*/
         }
+    }
+
+    public void pause() {
+        isPaused = true;
+        System.out.println("Simulation paused");
+    }
+
+    public void resumeSimulation() {
+        if (isPaused) {
+            isPaused = false;
+            logger.info("Simulation resumed");
+
+            while (!isPaused) {
+                nextTurn();
+                try {
+                    Thread.sleep(simulationSpeed);
+                } catch (InterruptedException e) {
+                    logger.log(Level.SEVERE, "Simulation interrupted", e);
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+    }
+
+    public void resetSimulation() {
+        isPaused = true;
+        logger.info("Simulation stopped");
+
+        worldMap.getEntities().clear();
+        creaturesOfLastGen.clear();
+        entitiesToRemove.clear();
+
+        turnCounter = 0;
+        genCounter = 1;
+
+        logger.info("Simulation reset complete");
+    }
+
+    public void increaseSpeed() {
+        if (simulationSpeed > 250) {
+            simulationSpeed -= 250;
+            System.out.println("Speed increased, new delay: " + simulationSpeed + "ms");
+        }
+    }
+
+    public void decreaseSpeed() {
+        simulationSpeed += 250;
+        System.out.println("Speed decreased, new delay: " + simulationSpeed + "ms");
     }
 
     private void nextTurn() {
@@ -164,9 +221,8 @@ public class Simulation {
 
         //int newPopulationSize = numberOfCreatures;
 
-        List<Creature> topCreatures = selectTopCreatures(8);
+        List<Creature> topCreatures = selectTopCreatures(numberOfCreatures / 5);
 
-        // Clear the map and spawn new creatures
         worldMap.getEntities().clear();
         creaturesOfLastGen.clear();
 
@@ -175,9 +231,9 @@ public class Simulation {
             creature.setHealth(10);
             creature.setLifetime(0);
 
-            placeCreatureOnMap(creature.getGenome(), 7);
+            placeCreatureOnMap(creature.getGenome(), numberOfCreatures / 5 - 1);
 
-            initializeCreatures( 1);
+            initializeCreatures(1);
 
         }
 
@@ -246,10 +302,32 @@ public class Simulation {
         }
     }
 
+    public boolean isPaused() {
+        return isPaused;
+    }
+
+    //setters&getters
+
     public void setParameters(int numberOfFood, int numberOfPoison, int numberOfCreatures) {
         this.numberOfCreatures = numberOfCreatures;
         this.numberOfFood = numberOfFood;
         this.numberOfPoison = numberOfPoison;
         initializeMap();
+    }
+
+    public int getNumberOfFood() {
+        return numberOfFood;
+    }
+
+    public int getNumberOfPoison() {
+        return numberOfPoison;
+    }
+
+    public int getNumberOfCreatures() {
+        return numberOfCreatures;
+    }
+
+    public WorldMap getWorldMap() {
+        return worldMap;
     }
 }
