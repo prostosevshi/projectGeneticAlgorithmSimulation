@@ -4,6 +4,8 @@ import com.example.movingEntity.Creature;
 import com.example.model.Entity;
 import com.example.staticEntity.Food;
 import com.example.staticEntity.Poison;
+import com.example.ui.UIController;
+import javafx.application.Platform;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -15,6 +17,7 @@ public class Simulation {
 
     private WorldMap worldMap;
     private GeneticLogic geneticLogic;
+
 
     private final Random random = new Random();
 
@@ -32,7 +35,6 @@ public class Simulation {
 
     public Simulation() {
         this.isPaused = false;
-        //initializeMap();
     }
 
     public void initializeSimulation(int mapWidth, int mapHeight) {
@@ -51,7 +53,7 @@ public class Simulation {
 
     public void start() {
         logger.info("Starting simulation...");
-        //worldMap.render();
+
         while (!isPaused) {
 
             nextTurn();
@@ -167,7 +169,6 @@ public class Simulation {
             //System.out.println(map);
             logger.info("All creatures are dead. Generation " + (genCounter += 1) + " begins.");
         }
-
         //System.out.println("Top creature's lifetime: " + worldMap.getEntities().stream().toList().getFirst().getLifetime());
     }
 
@@ -221,7 +222,7 @@ public class Simulation {
 
         //int newPopulationSize = numberOfCreatures;
 
-        List<Creature> topCreatures = selectTopCreatures(numberOfCreatures / 5);
+        List<Creature> topCreatures = selectTopCreatures(8);
 
         worldMap.getEntities().clear();
         creaturesOfLastGen.clear();
@@ -231,7 +232,7 @@ public class Simulation {
             creature.setHealth(10);
             creature.setLifetime(0);
 
-            placeCreatureOnMap(creature.getGenome(), numberOfCreatures / 5 - 1);
+            placeCreatureOnMap(creature.getGenome(), 8 - 1);
 
             initializeCreatures(1);
 

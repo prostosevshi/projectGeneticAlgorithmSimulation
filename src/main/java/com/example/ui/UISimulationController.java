@@ -1,6 +1,10 @@
 package com.example.ui;
 
 import com.example.controller.Simulation;
+import com.example.model.Entity;
+import javafx.application.Platform;
+
+import java.util.List;
 
 public class UISimulationController {
 
