@@ -43,7 +43,7 @@ public class UISimulationController {
             simulation.resetSimulation();
         }
 
-        initializeSimulation(20, 10, 10, 10, 10);
+        initializeSimulation(40, 20, 40, 40, 30);
     }
 
     public void increaseSpeed() {

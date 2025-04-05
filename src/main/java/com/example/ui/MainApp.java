@@ -15,11 +15,11 @@ public class MainApp extends Application {
         UISimulationController uiSimulationController = new UISimulationController();
         UIController uiController = new UIController(uiSimulationController);
 
-        Scene scene = new Scene(uiController.getRoot(), 800, 600);
+        Scene scene = new Scene(uiController.getRoot(), 1000, 600);
         stage.setScene(scene);
         stage.setTitle("Simulation");
         stage.show();
 
-        uiSimulationController.initializeSimulation(20, 10, 10, 10, 10);
+        uiSimulationController.initializeSimulation(40, 20, 40, 40, 30);
     }
 }

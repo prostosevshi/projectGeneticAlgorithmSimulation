@@ -7,12 +7,12 @@ import com.example.staticEntity.Poison;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
@@ -22,15 +22,22 @@ import java.util.List;
 public class UIController {
 
     private UISimulationController uiSimulationController;
-    private GridPane gridPane;
+
+    //private GridPane gridPane;
+    private BorderPane rootPane;
+
     private Button pauseOrResumeButton;
+    private Label speedLabel;
+    private Label generationLabel;
+    private Label numberOfCreaturesAliveLabel;
+
     private Canvas canvas;
     private GraphicsContext gc;
+
     private static final int CELL_SIZE = 20;
 
     public UIController(UISimulationController uiSimulationController) {
         this.uiSimulationController = uiSimulationController;
-        this.gridPane = new GridPane();
         this.canvas = new Canvas(800, 600);
         this.gc = canvas.getGraphicsContext2D();
         startRenderLoop();
@@ -41,6 +48,26 @@ public class UIController {
         /*Button startButton = new Button("Start");
         startButton.setOnAction(event -> uiSimulationController.startSimulation());*/
 
+        rootPane = new BorderPane();
+
+        generationLabel = new Label("Generation: 0");
+        numberOfCreaturesAliveLabel = new Label("Creatures Alive: 0");
+
+        HBox topInfoBox = new HBox(20, generationLabel, numberOfCreaturesAliveLabel);
+        topInfoBox.setAlignment(Pos.CENTER);
+        topInfoBox.setStyle("-fx-padding: 10;");
+
+        rootPane.setTop(topInfoBox);
+
+        StackPane canvasWrapper = new StackPane(canvas);
+        canvasWrapper.setStyle("-fx-padding: 10;");
+        canvasWrapper.setAlignment(Pos.CENTER);
+        rootPane.setCenter(canvasWrapper);
+
+
+        ToolBar toolbar = new ToolBar();
+        toolbar.setStyle("-fx-padding: 10; -fx-background-color: transparent;");
+
         pauseOrResumeButton = new Button("Start");
         pauseOrResumeButton.setOnAction(event -> togglePause());
 
@@ -48,22 +75,56 @@ public class UIController {
         resetButton.setOnAction(event -> uiSimulationController.resetSimulation());
 
         Button speedUpButton = new Button("Speed Up ");
-        speedUpButton.setOnAction(event -> uiSimulationController.increaseSpeed());
+        speedUpButton.setOnAction(event -> {
+            uiSimulationController.increaseSpeed();
+            updateSpeedLabel();
+        });
 
         Button slowDownButton = new Button("Slow Down");
-        slowDownButton.setOnAction(event -> uiSimulationController.decreaseSpeed());
+        slowDownButton.setOnAction(event -> {
+            uiSimulationController.decreaseSpeed();
+            updateSpeedLabel();
+        });
 
         Button changeParametersButton = new Button("Change Parameters");
         changeParametersButton.setOnAction(event -> showParameterDialog());
 
-        //gridPane.add(startButton, 0, 0);
-        gridPane.add(pauseOrResumeButton, 1, 0);
-        gridPane.add(resetButton, 2, 0);
-        gridPane.add(speedUpButton, 3, 0);
-        gridPane.add(slowDownButton, 4, 0);
-        gridPane.add(changeParametersButton, 5, 0);
-        gridPane.add(canvas, 0, 1, 6, 1); // Добавляем холст в UI
+        speedLabel = new Label();
+        updateSpeedLabel();
 
+        Region spacerLeft = new Region();
+        Region spacerRight = new Region();
+        HBox.setHgrow(spacerLeft, Priority.ALWAYS);
+        HBox.setHgrow(spacerRight, Priority.ALWAYS);
+
+        HBox buttonBox = new HBox(10, spacerLeft,
+                pauseOrResumeButton,
+                resetButton,
+                speedUpButton,
+                slowDownButton,
+                changeParametersButton,
+                new Region(), // spacer
+                speedLabel);
+        HBox.setHgrow(buttonBox.getChildren().get(buttonBox.getChildren().size() - 2), Priority.ALWAYS);
+        buttonBox.setAlignment(Pos.CENTER);
+        buttonBox.setStyle("-fx-padding: 10;");
+
+        rootPane.setBottom(buttonBox);
+
+        // ======= Настройка размеров =======
+        //canvas.widthProperty().bind(rootPane.widthProperty().subtract(20));
+        canvas.heightProperty().bind(rootPane.heightProperty().subtract(100));
+
+    }
+
+    public void updateGenerationAndAlive() {
+        generationLabel.setText("Generation: " + uiSimulationController.getSimulation().getGenCounter());
+        numberOfCreaturesAliveLabel.setText("Creatures Alive: " + uiSimulationController.getSimulation().getNumberOfCreaturesAlive() );
+    }
+
+    private void updateSpeedLabel() {
+        double speed = uiSimulationController.getSimulation().getSpeed();
+        speedLabel.setText(String.format("Speed: %.1fx", speed));
     }
 
     public void drawEntities(List<Entity> entities, int mapWidth, int mapHeight) {
@@ -112,6 +173,7 @@ public class UIController {
     private void startRenderLoop() {
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), event -> {
             if (uiSimulationController.getSimulation().getWorldMap() != null) {
+                updateGenerationAndAlive();
                 List<Entity> entities = uiSimulationController.getSimulation().getWorldMap().getEntities();
                 drawEntities(entities,
                         uiSimulationController.getSimulation().getWorldMap().getWidth(),
@@ -201,6 +263,6 @@ public class UIController {
     }
 
     public Parent getRoot() {
-        return gridPane;
+        return rootPane;
     }
 }

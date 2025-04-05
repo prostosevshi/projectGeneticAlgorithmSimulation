@@ -331,4 +331,16 @@ public class Simulation {
     public WorldMap getWorldMap() {
         return worldMap;
     }
+
+    public double getSpeed() {
+        return (3.0 - (double) simulationSpeed / 1000);
+    }
+
+    public int getGenCounter() {
+        return genCounter;
+    }
+
+    public int getNumberOfCreaturesAlive() {
+        return (int) worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count();
+    }
 }
