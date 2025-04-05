@@ -18,12 +18,12 @@ import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
 import java.util.List;
+import java.util.Optional;
 
 public class UIController {
 
     private UISimulationController uiSimulationController;
 
-    //private GridPane gridPane;
     private BorderPane rootPane;
 
     private Button pauseOrResumeButton;
@@ -64,9 +64,8 @@ public class UIController {
         canvasWrapper.setAlignment(Pos.CENTER);
         rootPane.setCenter(canvasWrapper);
 
-
-        ToolBar toolbar = new ToolBar();
-        toolbar.setStyle("-fx-padding: 10; -fx-background-color: transparent;");
+        //ToolBar toolbar = new ToolBar();
+        //toolbar.setStyle("-fx-padding: 10; -fx-background-color: transparent;");
 
         pauseOrResumeButton = new Button("Start");
         pauseOrResumeButton.setOnAction(event -> togglePause());
@@ -119,7 +118,7 @@ public class UIController {
 
     public void updateGenerationAndAlive() {
         generationLabel.setText("Generation: " + uiSimulationController.getSimulation().getGenCounter());
-        numberOfCreaturesAliveLabel.setText("Creatures Alive: " + uiSimulationController.getSimulation().getNumberOfCreaturesAlive() );
+        numberOfCreaturesAliveLabel.setText("Creatures Alive: " + uiSimulationController.getSimulation().getNumberOfCreaturesAlive());
     }
 
     private void updateSpeedLabel() {
@@ -195,32 +194,21 @@ public class UIController {
     }
 
     private void showParameterDialog() {
-        uiSimulationController.getSimulation().resetSimulation();
 
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Change Parameters");
 
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
 
-        TextField widthField = new TextField();
-        widthField.setText(String.valueOf(uiSimulationController.getSimulation().getWorldMap().getWidth()));
-
-        TextField heightField = new TextField();
-        heightField.setText(String.valueOf(uiSimulationController.getSimulation().getWorldMap().getHeight()));
-
-        TextField foodField = new TextField();
-        foodField.setText(String.valueOf(uiSimulationController.getSimulation().getNumberOfFood()));
-
-        TextField poisonField = new TextField();
-        poisonField.setText(String.valueOf(uiSimulationController.getSimulation().getNumberOfPoison()));
-
-        TextField creaturesField = new TextField();
-        creaturesField.setText(String.valueOf(uiSimulationController.getSimulation().getNumberOfCreatures()));
+        TextField widthField = new TextField(String.valueOf(uiSimulationController.getSimulation().getWorldMap().getWidth()));
+        TextField heightField = new TextField(String.valueOf(uiSimulationController.getSimulation().getWorldMap().getHeight()));
+        TextField foodField = new TextField(String.valueOf(uiSimulationController.getSimulation().getNumberOfFood()));
+        TextField poisonField = new TextField(String.valueOf(uiSimulationController.getSimulation().getNumberOfPoison()));
+        TextField creaturesField = new TextField(String.valueOf(uiSimulationController.getSimulation().getNumberOfCreatures()));
 
         grid.add(new Label("Map Width:"), 0, 0);
         grid.add(widthField, 1, 0);
@@ -239,7 +227,9 @@ public class UIController {
 
         dialog.getDialogPane().setContent(grid);
 
-        dialog.setResultConverter(dialogButton -> {
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 int width = Integer.parseInt(widthField.getText());
                 int height = Integer.parseInt(heightField.getText());
@@ -247,6 +237,7 @@ public class UIController {
                 int poison = Integer.parseInt(poisonField.getText());
                 int creatures = Integer.parseInt(creaturesField.getText());
 
+                uiSimulationController.getSimulation().resetSimulation();
                 uiSimulationController.changeMapSize(width, height);
                 uiSimulationController.updateParameters(food, poison, creatures);
             } catch (NumberFormatException e) {
@@ -256,10 +247,7 @@ public class UIController {
                 alert.setContentText("Please make sure all fields are filled with valid numbers.");
                 alert.showAndWait();
             }
-            return null;
-        });
-
-        dialog.showAndWait();
+        }
     }
 
     public Parent getRoot() {

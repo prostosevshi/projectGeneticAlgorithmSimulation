@@ -4,8 +4,6 @@ import com.example.movingEntity.Creature;
 import com.example.model.Entity;
 import com.example.staticEntity.Food;
 import com.example.staticEntity.Poison;
-import com.example.ui.UIController;
-import javafx.application.Platform;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -18,11 +16,10 @@ public class Simulation {
     private WorldMap worldMap;
     private GeneticLogic geneticLogic;
 
-
     private final Random random = new Random();
 
     private int numberOfFood, numberOfPoison, numberOfCreatures;
-    private int simulationSpeed = 1500;
+    private int simulationSpeed = 1000;
 
     public List<Entity> creaturesOfLastGen = new ArrayList<>();
     public List<Entity> entitiesToRemove = new ArrayList<>();
@@ -124,7 +121,6 @@ public class Simulation {
 
         logger.info("Turn " + turnCounter);
         System.out.println("Turn: " + turnCounter + " Generation: " + genCounter + " Number of creatures alive: " + worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count());
-        //System.out.println(map);
 
         worldMap.render();
 
@@ -156,8 +152,6 @@ public class Simulation {
             }
         }
 
-        //worldMap.render();
-
         if (allCreaturesDead()) {
 
             statMap.put(genCounter, /*calculateAverageLifetime())*/turnCounter);
@@ -166,7 +160,6 @@ public class Simulation {
 
             turnCounter = 0;
 
-            //System.out.println(map);
             logger.info("All creatures are dead. Generation " + (genCounter += 1) + " begins.");
         }
         //System.out.println("Top creature's lifetime: " + worldMap.getEntities().stream().toList().getFirst().getLifetime());
@@ -189,13 +182,6 @@ public class Simulation {
     }
 
     public void placeCreatureOnMap(int[][] genome, int number) {
-        /*int x, y;
-        do {
-            x = random.nextInt(worldMap.getWidth());
-            y = random.nextInt(worldMap.getHeight());
-        } while (worldMap.getEntityAt(x, y) != null);
-
-        creature.setPosition(x, y);*/
 
         for (int i = 0; i < number; i++) {
             int x, y;
@@ -222,7 +208,7 @@ public class Simulation {
 
         //int newPopulationSize = numberOfCreatures;
 
-        List<Creature> topCreatures = selectTopCreatures(8);
+        List<Creature> topCreatures = selectTopCreatures(5);
 
         worldMap.getEntities().clear();
         creaturesOfLastGen.clear();
@@ -232,7 +218,7 @@ public class Simulation {
             creature.setHealth(10);
             creature.setLifetime(0);
 
-            placeCreatureOnMap(creature.getGenome(), 8 - 1);
+            placeCreatureOnMap(creature.getGenome(), 5);
 
             initializeCreatures(1);
 
@@ -333,7 +319,7 @@ public class Simulation {
     }
 
     public double getSpeed() {
-        return (3.0 - (double) simulationSpeed / 1000);
+        return (2.0 - (double) simulationSpeed / 1000);
     }
 
     public int getGenCounter() {

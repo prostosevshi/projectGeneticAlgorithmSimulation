@@ -48,8 +48,8 @@ public class GeneticLogic {
                     return;
                 }
 
-                /*//genome for checking ifPoison
-                if (genome[i][j] >= 8 && genome[i][j] <= 15) {
+                //TODO: genome for checking ifPoison
+                /*if (genome[i][j] >= 8 && genome[i][j] <= 15) {
                     interact(creature, genome[i][j]);
                     //logger.info("Creature tried to interact.");
                     //System.out.println("creature " + creature.toString() + " tried to interact");
