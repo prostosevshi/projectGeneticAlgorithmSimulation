@@ -20,6 +20,6 @@ public class MainApp extends Application {
         stage.setTitle("Simulation");
         stage.show();
 
-        uiSimulationController.initializeSimulation(40, 20, 40, 40, 30);
+        uiSimulationController.initializeSimulation(40, 20, 80, 80, 64);
     }
 }

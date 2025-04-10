@@ -39,7 +39,7 @@ public class UISimulationController {
             simulation.resetSimulation();
         }
 
-        initializeSimulation(40, 20, 40, 40, 30);
+        initializeSimulation(40, 20, 80, 80, 64);
     }
 
     public void increaseSpeed() {
@@ -57,6 +57,8 @@ public class UISimulationController {
     public void updateParameters(int numberOfFood, int numberOfPoison, int numberOfCreatures) {
         simulation.setParameters(numberOfFood, numberOfPoison, numberOfCreatures);
     }
+
+    //TODO: overall geninfo button
 
     //getters&setters
 

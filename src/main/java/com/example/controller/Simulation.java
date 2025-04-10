@@ -31,7 +31,7 @@ public class Simulation {
     private boolean isPaused;
 
     public Simulation() {
-        this.isPaused = false;
+        this.isPaused = true;
     }
 
     public void initializeSimulation(int mapWidth, int mapHeight) {
@@ -109,10 +109,16 @@ public class Simulation {
             simulationSpeed -= 250;
             System.out.println("Speed increased, new delay: " + simulationSpeed + "ms");
         }
+        if (simulationSpeed < 2000 && isPaused) {
+            isPaused = false;
+        }
     }
 
     public void decreaseSpeed() {
         simulationSpeed += 250;
+        if (simulationSpeed >= 1750) {
+            isPaused = true;
+        }
         System.out.println("Speed decreased, new delay: " + simulationSpeed + "ms");
     }
 
