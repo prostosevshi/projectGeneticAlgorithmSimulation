@@ -39,6 +39,10 @@ public class Creature extends Entity {
         }
     }
 
+    public void changeLifetime(int delta) {
+        lifetime += delta;
+    }
+
     public int[][] getGenome() {
         return genome;
     }

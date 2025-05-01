@@ -16,14 +16,6 @@ public class UISimulationController {
         simulation.setParameters(numberOfFood, numberOfPoison, numberOfCreatures);
     }
 
-    public void startSimulation() {
-        if (simulationThread == null || !simulationThread.isAlive()) {
-            simulationThread = new Thread(() -> simulation.start());
-            simulationThread.setDaemon(true);
-            simulationThread.start();
-        }
-    }
-
     public void pauseOrResumeSimulation() {
         if(simulation.isPaused()){
             if (simulationThread == null || !simulationThread.isAlive()) {
@@ -57,8 +49,6 @@ public class UISimulationController {
     public void updateParameters(int numberOfFood, int numberOfPoison, int numberOfCreatures) {
         simulation.setParameters(numberOfFood, numberOfPoison, numberOfCreatures);
     }
-
-    //TODO: overall geninfo button
 
     //getters&setters
 

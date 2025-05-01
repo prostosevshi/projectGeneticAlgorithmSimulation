@@ -4,8 +4,10 @@ import com.example.movingEntity.Creature;
 import com.example.model.Entity;
 import com.example.staticEntity.Food;
 import com.example.staticEntity.Poison;
+import javafx.application.Platform;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +26,9 @@ public class Simulation {
     public List<Entity> creaturesOfLastGen = new ArrayList<>();
     public List<Entity> entitiesToRemove = new ArrayList<>();
     public Map<Integer, Integer> statMap = new LinkedHashMap<>();
+
+    public final LinkedList<Integer> last10Lifetimes  = new LinkedList<>();
+    private Consumer<List<Integer>> lifetimeUpdateListener;
 
     private int turnCounter = 0;
     private int genCounter = 1;
@@ -109,16 +114,16 @@ public class Simulation {
             simulationSpeed -= 250;
             System.out.println("Speed increased, new delay: " + simulationSpeed + "ms");
         }
-        if (simulationSpeed < 2000 && isPaused) {
-            isPaused = false;
-        }
+        /*if (simulationSpeed < 2000 && isPaused) {
+            resumeSimulation();
+        }*/
     }
 
     public void decreaseSpeed() {
         simulationSpeed += 250;
-        if (simulationSpeed >= 1750) {
+        /*if (simulationSpeed >= 2000) {
             isPaused = true;
-        }
+        }*/
         System.out.println("Speed decreased, new delay: " + simulationSpeed + "ms");
     }
 
@@ -138,6 +143,7 @@ public class Simulation {
                 geneticLogic.decideEverything(creature);
 
                 creature.changeHealth(-1);
+                creature.changeLifetime(1);
             }
         }
 
@@ -214,6 +220,15 @@ public class Simulation {
 
         //int newPopulationSize = numberOfCreatures;
 
+        /*addGenerationDuration(worldMap.getEntities().stream()
+                .filter(entity -> entity instanceof Creature)
+                .map(entity -> (Creature) entity)
+                .findFirst()
+                .map(Creature::getLifetime)
+                .orElse(0) - 10);*/
+
+        recordLifetime(creaturesOfLastGen);
+
         List<Creature> topCreatures = selectTopCreatures(5);
 
         worldMap.getEntities().clear();
@@ -224,7 +239,7 @@ public class Simulation {
             creature.setHealth(10);
             creature.setLifetime(0);
 
-            placeCreatureOnMap(creature.getGenome(), 5);
+            placeCreatureOnMap(creature.getGenome(), 11);
 
             initializeCreatures(1);
 
@@ -232,6 +247,27 @@ public class Simulation {
 
         initializeFoodAndPoison(numberOfFood, numberOfPoison);
     }
+
+    public void recordLifetime(List<Entity> entities) {
+        final int lifetime = entities.stream()
+                .filter(entity -> entity instanceof Creature)
+                .map(entity -> (Creature) entity)
+                .mapToInt(Creature::getLifetime)
+                .max()
+                .orElse(0);
+
+        last10Lifetimes.addLast(Math.max(0, lifetime));
+        if (last10Lifetimes.size() > 10) {
+            last10Lifetimes.removeFirst();
+        }
+
+        if (lifetimeUpdateListener != null) {
+            Platform.runLater(() -> {
+                lifetimeUpdateListener.accept(new ArrayList<>(last10Lifetimes));
+            });
+        }
+    }
+
 
     public List<Creature> selectTopCreatures(int topN) {
         return creaturesOfLastGen.stream()
@@ -300,6 +336,10 @@ public class Simulation {
     }
 
     //setters&getters
+
+    public void setLifetimeUpdateListener(Consumer<List<Integer>> listener) {
+        this.lifetimeUpdateListener = listener;
+    }
 
     public void setParameters(int numberOfFood, int numberOfPoison, int numberOfCreatures) {
         this.numberOfCreatures = numberOfCreatures;

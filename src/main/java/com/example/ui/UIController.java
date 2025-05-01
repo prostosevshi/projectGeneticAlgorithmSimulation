@@ -17,6 +17,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,10 +36,14 @@ public class UIController {
     private Canvas canvas;
     private GraphicsContext gc;
 
+    private VBox lifetimeHistoryBox;
+
     private static final int CELL_SIZE = 20;
 
     public UIController(UISimulationController uiSimulationController) {
         this.uiSimulationController = uiSimulationController;
+        uiSimulationController.getSimulation().setLifetimeUpdateListener(this::updateLifetimeHistory);
+
         this.canvas = new Canvas(800, 600);
         this.gc = canvas.getGraphicsContext2D();
         startRenderLoop();
@@ -91,6 +97,18 @@ public class UIController {
         speedLabel = new Label();
         updateSpeedLabel();
 
+        //VBOX
+        lifetimeHistoryBox = new VBox(5);
+        lifetimeHistoryBox.setStyle("-fx-padding: 10;");
+        lifetimeHistoryBox.setAlignment(Pos.TOP_LEFT);
+        Label historyLabel = new Label("Last 10 generations:");
+        lifetimeHistoryBox.getChildren().add(historyLabel);
+
+        StackPane rightPane = new StackPane(lifetimeHistoryBox);
+        rightPane.setStyle("-fx-padding: 10;");
+        rootPane.setRight(rightPane);
+        //VBOX
+
         Region spacerLeft = new Region();
         Region spacerRight = new Region();
         HBox.setHgrow(spacerLeft, Priority.ALWAYS);
@@ -114,6 +132,29 @@ public class UIController {
         //canvas.widthProperty().bind(rootPane.widthProperty().subtract(20));
         canvas.heightProperty().bind(rootPane.heightProperty().subtract(100));
 
+    }
+
+    public void updateLifetimeHistory(List<Integer> lifetimes) {
+        lifetimeHistoryBox.getChildren().clear();
+
+        Label historyLabel = new Label("Last 10 lifetimes:");
+        lifetimeHistoryBox.getChildren().add(historyLabel);
+
+        List<Integer> padded = new ArrayList<>();
+
+        int missing = 10 - lifetimes.size();
+        for (int i = 0; i < missing; i++) {
+            padded.add(0);
+        }
+        padded.addAll(lifetimes);
+
+        List<Integer> last10 = padded.subList(padded.size() - 10, padded.size());
+        Collections.reverse(last10);
+
+        for (int lifetime : last10) {
+            Label label = new Label(String.valueOf(lifetime));
+            lifetimeHistoryBox.getChildren().add(label);
+        }
     }
 
     public void updateGenerationAndAlive() {
