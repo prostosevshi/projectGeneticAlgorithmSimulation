@@ -1,9 +1,9 @@
-package com.example.controller;
+package com.example.controller.world;
 
 import com.example.model.Entity;
-import com.example.movingEntity.Creature;
-import com.example.staticEntity.Food;
-import com.example.staticEntity.Poison;
+import com.example.model.creature.Creature;
+import com.example.model.staticEntity.Food;
+import com.example.model.staticEntity.Poison;
 
 import java.util.ArrayList;
 import java.util.List;

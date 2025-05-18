@@ -1,6 +1,5 @@
-package com.example.movingEntity;
+package com.example.model.creature;
 
-import com.example.controller.WorldMap;
 import com.example.model.Entity;
 
 public class Creature extends Entity {

@@ -1,4 +1,4 @@
-package com.example.staticEntity;
+package com.example.model.staticEntity;
 
 import com.example.model.Entity;
 

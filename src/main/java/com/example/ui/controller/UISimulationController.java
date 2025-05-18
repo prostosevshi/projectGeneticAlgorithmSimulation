@@ -1,6 +1,6 @@
-package com.example.ui;
+package com.example.ui.controller;
 
-import com.example.controller.Simulation;
+import com.example.controller.simulation.Simulation;
 
 public class UISimulationController {
 
@@ -11,13 +11,26 @@ public class UISimulationController {
         this.simulation = new Simulation();
     }
 
+    /*private LinkedList<Entity> startSimulation() {
+
+        while (flag == 1) {
+
+            Simulation simulation = new Simulation();
+
+            if (simulation.allCreaturesDead()) {
+                simulation.recordLifetime(getSimulation().creaturesOfLastGen);
+                startSimulation();
+            }
+        }
+    }*/
+
     public void initializeSimulation(int mapWidth, int mapHeight, int numberOfFood, int numberOfPoison, int numberOfCreatures) {
         simulation.initializeSimulation(mapWidth, mapHeight);
         simulation.setParameters(numberOfFood, numberOfPoison, numberOfCreatures);
     }
 
     public void pauseOrResumeSimulation() {
-        if(simulation.isPaused()){
+        if (simulation.isPaused()) {
             if (simulationThread == null || !simulationThread.isAlive()) {
                 simulationThread = new Thread(() -> simulation.resumeSimulation());
                 simulationThread.setDaemon(true);
@@ -27,7 +40,7 @@ public class UISimulationController {
     }
 
     public void resetSimulation() {
-        if(simulationThread == null || !simulationThread.isAlive()) {
+        if (simulationThread == null || !simulationThread.isAlive()) {
             simulation.resetSimulation();
         }
 

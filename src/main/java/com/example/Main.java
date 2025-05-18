@@ -1,6 +1,6 @@
 package com.example;
 
-import com.example.controller.Simulation;
+import com.example.controller.simulation.Simulation;
 
 public class Main {
     public static void main(String[] args) {

@@ -1,9 +1,13 @@
-package com.example.controller;
+package com.example.controller.logic;
 
+import com.example.controller.simulation.Simulation;
+import com.example.controller.world.WorldMap;
+import com.example.controller.enums.Direction;
+import com.example.controller.enums.GeneType;
 import com.example.model.Entity;
-import com.example.movingEntity.Creature;
-import com.example.staticEntity.Food;
-import com.example.staticEntity.Poison;
+import com.example.model.creature.Creature;
+import com.example.model.staticEntity.Food;
+import com.example.model.staticEntity.Poison;
 
 public class GeneticLogic {
 

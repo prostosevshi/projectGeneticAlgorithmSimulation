@@ -1,9 +1,11 @@
-package com.example.controller;
+package com.example.controller.simulation;
 
-import com.example.movingEntity.Creature;
+import com.example.controller.world.WorldMap;
+import com.example.controller.logic.GeneticLogic;
+import com.example.model.creature.Creature;
 import com.example.model.Entity;
-import com.example.staticEntity.Food;
-import com.example.staticEntity.Poison;
+import com.example.model.staticEntity.Food;
+import com.example.model.staticEntity.Poison;
 import javafx.application.Platform;
 
 import java.util.*;
@@ -13,21 +15,20 @@ import java.util.logging.Logger;
 
 public class Simulation {
 
+    private final Random random = new Random();
     private static final Logger logger = Logger.getLogger(Simulation.class.getName());
 
     private WorldMap worldMap;
     private GeneticLogic geneticLogic;
-
-    private final Random random = new Random();
 
     private int numberOfFood, numberOfPoison, numberOfCreatures;
     private int simulationSpeed = 1000;
 
     public List<Entity> creaturesOfLastGen = new ArrayList<>();
     public List<Entity> entitiesToRemove = new ArrayList<>();
-    public Map<Integer, Integer> statMap = new LinkedHashMap<>();
+    //public Map<Integer, Integer> statMap = new LinkedHashMap<>();
 
-    public final LinkedList<Integer> last10Lifetimes  = new LinkedList<>();
+    public final LinkedList<Integer> last10Lifetimes = new LinkedList<>();
     private Consumer<List<Integer>> lifetimeUpdateListener;
 
     private int turnCounter = 0;
@@ -37,6 +38,7 @@ public class Simulation {
 
     public Simulation() {
         this.isPaused = true;
+        //start();
     }
 
     public void initializeSimulation(int mapWidth, int mapHeight) {
@@ -110,7 +112,10 @@ public class Simulation {
     }
 
     public void increaseSpeed() {
-        if (simulationSpeed > 250) {
+        if (simulationSpeed == 250) {
+            simulationSpeed = 100;
+            System.out.println("Speed increased, new delay: " + simulationSpeed + "ms");
+        } else if (simulationSpeed > 250) {
             simulationSpeed -= 250;
             System.out.println("Speed increased, new delay: " + simulationSpeed + "ms");
         }
@@ -120,7 +125,9 @@ public class Simulation {
     }
 
     public void decreaseSpeed() {
-        simulationSpeed += 250;
+        if(simulationSpeed == 100){
+            simulationSpeed = 250;
+        } else simulationSpeed += 250;
         /*if (simulationSpeed >= 2000) {
             isPaused = true;
         }*/
@@ -166,7 +173,7 @@ public class Simulation {
 
         if (allCreaturesDead()) {
 
-            statMap.put(genCounter, /*calculateAverageLifetime())*/turnCounter);
+            //statMap.put(genCounter, /*calculateAverageLifetime())*/turnCounter);
 
             evolveOnExtinction();
 
@@ -177,7 +184,7 @@ public class Simulation {
         //System.out.println("Top creature's lifetime: " + worldMap.getEntities().stream().toList().getFirst().getLifetime());
     }
 
-    private boolean allCreaturesDead() {
+    public boolean allCreaturesDead() {
         return worldMap.getEntities().stream().noneMatch(e -> e instanceof Creature);
     }
 

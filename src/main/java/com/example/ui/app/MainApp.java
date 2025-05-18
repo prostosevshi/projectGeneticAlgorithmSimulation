@@ -1,4 +1,6 @@
-package com.example.ui;
+package com.example.ui.app;
+import com.example.ui.controller.UIController;
+import com.example.ui.controller.UISimulationController;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;

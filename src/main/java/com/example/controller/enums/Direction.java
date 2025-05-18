@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.enums;
 
 public enum Direction {
     UP_LEFT(-1, 1),

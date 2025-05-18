@@ -1,9 +1,9 @@
-package com.example.ui;
+package com.example.ui.controller;
 
 import com.example.model.Entity;
-import com.example.movingEntity.Creature;
-import com.example.staticEntity.Food;
-import com.example.staticEntity.Poison;
+import com.example.model.creature.Creature;
+import com.example.model.staticEntity.Food;
+import com.example.model.staticEntity.Poison;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -24,6 +24,8 @@ import java.util.Optional;
 
 public class UIController {
 
+    private static final int CELL_SIZE = 20;
+
     private UISimulationController uiSimulationController;
 
     private BorderPane rootPane;
@@ -37,8 +39,6 @@ public class UIController {
     private GraphicsContext gc;
 
     private VBox lifetimeHistoryBox;
-
-    private static final int CELL_SIZE = 20;
 
     public UIController(UISimulationController uiSimulationController) {
         this.uiSimulationController = uiSimulationController;
