@@ -6,8 +6,9 @@ public class Creature extends Entity {
 
     protected int health;
     private int[][] genome;
-    private int i, j = 0;
+    //private int i, j = 0;
     private int lifetime = 0;
+    private int actionCounter = 0;
 
     public Creature(int x, int y, int[][] genome) {
         super(x, y);
@@ -46,7 +47,7 @@ public class Creature extends Entity {
         return genome;
     }
 
-    public int getI() {
+    /*public int getI() {
         return i;
     }
 
@@ -60,7 +61,7 @@ public class Creature extends Entity {
 
     public void setJ(int j) {
         this.j = j;
-    }
+    }*/
 
     public int getLifetime() {
         return lifetime;
@@ -68,5 +69,17 @@ public class Creature extends Entity {
 
     public void setLifetime(int lifetime) {
         this.lifetime = lifetime;
+    }
+
+    public int getActionCounter() {
+        return actionCounter;
+    }
+
+    public void setActionCounter(int actionCounter) {
+        this.actionCounter = actionCounter;
+    }
+
+    public void changeActionCounter(int delta) {
+        this.actionCounter += delta;
     }
 }

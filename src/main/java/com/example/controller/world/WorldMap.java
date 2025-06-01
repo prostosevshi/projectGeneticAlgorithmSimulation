@@ -1,5 +1,6 @@
 package com.example.controller.world;
 
+import com.example.controller.enums.Direction;
 import com.example.model.Entity;
 import com.example.model.creature.Creature;
 import com.example.model.staticEntity.Food;
@@ -47,6 +48,18 @@ public class WorldMap {
     public List<Entity> getEntities() {
         return entities;
     }
+
+    public Entity getEntityInDirection(Creature creature, Direction direction) {
+        int newX = creature.getX() + direction.dx();
+        int newY = creature.getY() + direction.dy();
+
+        if (newX < 0 || newX >= getWidth() || newY < 0 || newY >= getHeight()) {
+            return null;
+        }
+
+        return getEntityAt(newX, newY);
+    }
+
 
     public void removeEntity(Entity entity) {
         entities.remove(entity);

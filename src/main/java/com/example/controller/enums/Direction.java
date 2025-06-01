@@ -33,4 +33,12 @@ public enum Direction {
     public static Direction fromInteractGene(int gene) {
         return values()[gene - 8]; // gene 8-15
     }
+
+    public static Direction fromLookGene(int gene) {
+        return values()[gene - 16]; // gene 16-23
+    }
+
+    public static Direction fromTurnGene(int gene) {
+        return values()[gene - 24]; // gene 24-31
+    }
 }

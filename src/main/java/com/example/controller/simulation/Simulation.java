@@ -26,7 +26,6 @@ public class Simulation {
 
     public List<Entity> creaturesOfLastGen = new ArrayList<>();
     public List<Entity> entitiesToRemove = new ArrayList<>();
-    //public Map<Integer, Integer> statMap = new LinkedHashMap<>();
 
     public final LinkedList<Integer> last10Lifetimes = new LinkedList<>();
     private Consumer<List<Integer>> lifetimeUpdateListener;
@@ -61,10 +60,6 @@ public class Simulation {
         while (!isPaused) {
 
             nextTurn();
-            /*if (genCounter == 20000) {
-                System.out.println(statMap);
-                break;
-            }*/
             try {
                 Thread.sleep(simulationSpeed); // 1000 миллисекунд = 1 секунда
             } catch (InterruptedException e) {
@@ -114,24 +109,25 @@ public class Simulation {
     public void increaseSpeed() {
         if (simulationSpeed == 250) {
             simulationSpeed = 100;
-            System.out.println("Speed increased, new delay: " + simulationSpeed + "ms");
         } else if (simulationSpeed > 250) {
             simulationSpeed -= 250;
-            System.out.println("Speed increased, new delay: " + simulationSpeed + "ms");
         }
-        /*if (simulationSpeed < 2000 && isPaused) {
+        System.out.println("Speed increased, new delay: " + simulationSpeed + "ms");
+        /*TODO pause when too slow
+           if (simulationSpeed < 2000 && isPaused) {
             resumeSimulation();
         }*/
     }
 
     public void decreaseSpeed() {
-        if(simulationSpeed == 100){
+        if (simulationSpeed == 100) {
             simulationSpeed = 250;
         } else simulationSpeed += 250;
-        /*if (simulationSpeed >= 2000) {
+        System.out.println("Speed decreased, new delay: " + simulationSpeed + "ms");
+        /*TODO pause when too slow
+           if (simulationSpeed >= 2000) {
             isPaused = true;
         }*/
-        System.out.println("Speed decreased, new delay: " + simulationSpeed + "ms");
     }
 
     private void nextTurn() {
@@ -173,15 +169,12 @@ public class Simulation {
 
         if (allCreaturesDead()) {
 
-            //statMap.put(genCounter, /*calculateAverageLifetime())*/turnCounter);
-
             evolveOnExtinction();
 
             turnCounter = 0;
 
             logger.info("All creatures are dead. Generation " + (genCounter += 1) + " begins.");
         }
-        //System.out.println("Top creature's lifetime: " + worldMap.getEntities().stream().toList().getFirst().getLifetime());
     }
 
     public boolean allCreaturesDead() {
@@ -213,7 +206,8 @@ public class Simulation {
         }
     }
 
-    /*private double calculateAverageLifetime() {
+    /*TODO average lifetime
+       private double calculateAverageLifetime() {
         return creaturesOfLastGen.stream()
                 .filter(e -> e instanceof Creature)  // Оставляем только существа
                 .map(e -> (Creature) e)              // Преобразуем в Creature
