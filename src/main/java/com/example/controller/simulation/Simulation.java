@@ -15,8 +15,9 @@ import java.util.logging.Logger;
 
 public class Simulation {
 
-    private final Random random = new Random();
     private static final Logger logger = Logger.getLogger(Simulation.class.getName());
+    private final Random random = new Random();
+    public final LinkedList<Integer> last10Lifetimes = new LinkedList<>();
 
     private WorldMap worldMap;
     private GeneticLogic geneticLogic;
@@ -26,8 +27,6 @@ public class Simulation {
 
     public List<Entity> creaturesOfLastGen = new ArrayList<>();
     public List<Entity> entitiesToRemove = new ArrayList<>();
-
-    public final LinkedList<Integer> last10Lifetimes = new LinkedList<>();
     private Consumer<List<Integer>> lifetimeUpdateListener;
 
     private int turnCounter = 0;
@@ -219,15 +218,6 @@ public class Simulation {
 
     private void evolveOnExtinction() {
 
-        //int newPopulationSize = numberOfCreatures;
-
-        /*addGenerationDuration(worldMap.getEntities().stream()
-                .filter(entity -> entity instanceof Creature)
-                .map(entity -> (Creature) entity)
-                .findFirst()
-                .map(Creature::getLifetime)
-                .orElse(0) - 10);*/
-
         recordLifetime(creaturesOfLastGen);
 
         List<Creature> topCreatures = selectTopCreatures(5);
@@ -263,9 +253,7 @@ public class Simulation {
         }
 
         if (lifetimeUpdateListener != null) {
-            Platform.runLater(() -> {
-                lifetimeUpdateListener.accept(new ArrayList<>(last10Lifetimes));
-            });
+            Platform.runLater(() -> lifetimeUpdateListener.accept(new ArrayList<>(last10Lifetimes)));
         }
     }
 

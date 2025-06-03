@@ -4,7 +4,8 @@ import com.example.controller.simulation.Simulation;
 
 public class UISimulationController {
 
-    private Simulation simulation;
+    private final Simulation simulation;
+
     private Thread simulationThread;
 
     public UISimulationController() {
@@ -32,7 +33,7 @@ public class UISimulationController {
     public void pauseOrResumeSimulation() {
         if (simulation.isPaused()) {
             if (simulationThread == null || !simulationThread.isAlive()) {
-                simulationThread = new Thread(() -> simulation.resumeSimulation());
+                simulationThread = new Thread(simulation::resumeSimulation);
                 simulationThread.setDaemon(true);
                 simulationThread.start();
             }

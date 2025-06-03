@@ -41,4 +41,16 @@ public enum Direction {
     public static Direction fromTurnGene(int gene) {
         return values()[gene - 24]; // gene 24-31
     }
+
+    public static Direction fromGene(int gene) {
+        GeneType geneType = GeneType.fromGene(gene);
+
+        return switch (geneType) {
+            case MOVE     -> values()[gene];         // 0–7
+            case INTERACT -> values()[gene - 8];     // 8–15
+            case LOOK     -> values()[gene - 16];    // 16–23
+            case TURN     -> values()[gene - 24];    // 24–31
+            default -> throw new IllegalArgumentException("Gene " + gene + " does not map to a direction");
+        };
+    }
 }

@@ -13,11 +13,10 @@ import java.util.logging.Logger;
 public class WorldMap {
 
     private static final Logger logger = Logger.getLogger(WorldMap.class.getName());
+    private final List<Entity> entities;
 
     private int width;
     private int height;
-
-    private final List<Entity> entities;
 
     public WorldMap(int width, int height) {
         this.width = width;
@@ -59,7 +58,6 @@ public class WorldMap {
 
         return getEntityAt(newX, newY);
     }
-
 
     public void removeEntity(Entity entity) {
         entities.remove(entity);

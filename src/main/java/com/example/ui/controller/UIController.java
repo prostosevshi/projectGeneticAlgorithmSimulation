@@ -25,19 +25,15 @@ import java.util.Optional;
 public class UIController {
 
     private static final int CELL_SIZE = 20;
-
-    private UISimulationController uiSimulationController;
+    private final UISimulationController uiSimulationController;
+    private final Canvas canvas;
+    private final GraphicsContext gc;
 
     private BorderPane rootPane;
-
     private Button pauseOrResumeButton;
     private Label speedLabel;
     private Label generationLabel;
     private Label numberOfCreaturesAliveLabel;
-
-    private Canvas canvas;
-    private GraphicsContext gc;
-
     private VBox lifetimeHistoryBox;
 
     public UIController(UISimulationController uiSimulationController) {
@@ -182,7 +178,8 @@ public class UIController {
         gc.setLineWidth(2);
         gc.strokeRect(0, 0, mapWidth * CELL_SIZE, mapHeight * CELL_SIZE);
 
-        for (Entity entity : entities) {
+        List<Entity> entitiesCopy = new ArrayList<>(entities);
+        for (Entity entity : entitiesCopy) {
             int x = entity.getX();
             int y = entity.getY();
 

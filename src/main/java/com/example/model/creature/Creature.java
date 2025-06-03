@@ -5,8 +5,7 @@ import com.example.model.Entity;
 public class Creature extends Entity {
 
     protected int health;
-    private int[][] genome;
-    //private int i, j = 0;
+    private final int[][] genome;
     private int lifetime = 0;
     private int actionCounter = 0;
 
@@ -47,22 +46,6 @@ public class Creature extends Entity {
         return genome;
     }
 
-    /*public int getI() {
-        return i;
-    }
-
-    public int getJ() {
-        return j;
-    }
-
-    public void setI(int i) {
-        this.i = i;
-    }
-
-    public void setJ(int j) {
-        this.j = j;
-    }*/
-
     public int getLifetime() {
         return lifetime;
     }
@@ -76,10 +59,10 @@ public class Creature extends Entity {
     }
 
     public void setActionCounter(int actionCounter) {
-        this.actionCounter = actionCounter;
+        this.actionCounter = actionCounter % 64;
     }
 
     public void changeActionCounter(int delta) {
-        this.actionCounter += delta;
+        this.actionCounter = (this.actionCounter + delta) % 64;
     }
 }

@@ -31,60 +31,63 @@ public class GeneticLogic {
 
         GeneType geneType = GeneType.fromGene(gene);
 
-        Direction direction = Direction.fromMoveGene(gene);
+        //if turn or look no need for direction
+
+        if (geneType.equals(GeneType.UNKNOWN)) {
+            creature.changeActionCounter(gene);
+            return;
+        }
+
+        Direction direction = Direction.fromGene(gene); // fromMoveGene is worng indexOutOfBounds
         Entity entity = worldMap.getEntityInDirection(creature, direction);
         EntityType entityType = EntityType.fromEntity(entity);
-
         int offset = entityType.getOffset();
-        int newActionCounter = (counter + offset) % 64;
-        //int activeAC = creature.getActionCounter();
 
-        switch (geneType /*GeneType.fromGene(newActionCounter)*/) {
+        int newCounter = (counter + offset) % 64;
+        int geneFromNewCounter = genome[newCounter / 8][newCounter % 8];
+        int newActionCounter = (counter + geneFromNewCounter) % 64;
+
+        //int direction = (creature.getActionCounter() + 1) % 8;
+
+        switch (geneType) {
             case MOVE -> {
                 //TODO mb add direction from next ac
 
-                if (entityType == EntityType.NOTHING || entityType == EntityType.FOOD) {
+                /*if (entityType == EntityType.NOTHING || entityType == EntityType.FOOD) {*/
                     moveCreature(creature, direction);
-                    //???activeAC += activeAC;
-                }
-
-                //activeAC = (activeAC + entityType.getOffset()) % 64;
-
-                //moveCreature(creature, Direction.fromMoveGene(gene));
+                /*}*/
+                creature.setActionCounter(newActionCounter);
             }
 
             case INTERACT -> {
 
-                if (entityType == EntityType.FOOD) {
-                    eatFood(creature, direction);
-                    //???activeAC += activeAC;
-                } else if (entityType == EntityType.POISON) {
-                    neutralisePoison(creature, direction);
-                    //???activeAC += activeAC;
-                }
-
-                //activeAC = (activeAC + entityType.getOffset()) % 64;
-
-                //interact(creature, Direction.fromInteractGene(gene));
+                /*if (entityType == EntityType.FOOD) {*/
+                    /*eatFood(creature, direction);*/
+                    interact(creature, direction);
+                /*} else if (entityType == EntityType.POISON) {*/
+                    /*neutralisePoison(creature, direction);*/
+                    /*interact(creature, direction);*/
+                /*}*/
+                creature.setActionCounter(newActionCounter);
             }
 
             case LOOK -> {
                 look(creature, Direction.fromLookGene(gene));
+                creature.setActionCounter(newActionCounter);
                 //TODO executable up to 10 times
             }
 
             case TURN -> {
                 turn(creature, Direction.fromTurnGene(gene));
+                creature.setActionCounter(newActionCounter);
                 //TODO executable up to 10 times
-
-                creature.setActionCounter((counter + 1) % 64);
             }
 
-            case UNKNOWN -> {
+            /*case UNKNOWN -> {
                 creature.changeActionCounter(gene);
                 //TODO executable up to 10 times
                 return;
-            }
+            }*/
 
             //creature.changeActionCounter(activeAC);
         }
@@ -154,14 +157,12 @@ public class GeneticLogic {
     }
 
     private void eatFood(Creature creature, Direction direction) {
-
     }
 
     private void turn(Creature creature, Direction direction) {
     }
 
     private void look(Creature creature, Direction direction) {
-
     }
 
     /*private void advanceGenePointer(Creature creature, int i, int j) {
@@ -185,6 +186,30 @@ public class GeneticLogic {
         creature.setJ(newJ);
     }*/
 
+    public void interact(Creature creature, Direction direction) {
+        int newX = creature.getX() + direction.dx();
+        int newY = creature.getY() + direction.dy();
+
+        Entity entity = worldMap.getEntityAt(newX, newY);
+
+        if (entity instanceof Food) {
+            creature.changeHealth(10);
+            simulation.entitiesToRemove.add(entity);
+        } else if (entity instanceof Poison) {
+            simulation.entitiesToRemove.add(entity);
+            worldMap.addEntity(new Food(newX, newY));
+        }
+    }
+
+    private void moveCreature(Creature creature, Direction direction) {
+        int newX = creature.getX() + direction.dx();
+        int newY = creature.getY() + direction.dy();
+
+        if (newX >= 0 && newX < worldMap.getWidth() && newY >= 0 && newY < worldMap.getHeight()) {
+            encounter(creature, worldMap.getEntityAt(newX, newY), newX, newY);
+        }
+    }
+
     private void encounter(Creature creature, Entity entity, int newX, int newY) {
 
         if (entity instanceof Poison) {
@@ -207,31 +232,6 @@ public class GeneticLogic {
             }
         } else {
             creature.setPosition(newX, newY);
-        }
-    }
-
-    public void interact(Creature creature, Direction direction) {
-        int newX = creature.getX() + direction.dx();
-        int newY = creature.getY() + direction.dy();
-
-        Entity entity = worldMap.getEntityAt(newX, newY);
-
-        if (entity instanceof Food) {
-            creature.changeHealth(10);
-            simulation.entitiesToRemove.add(entity);
-        } else if (entity instanceof Poison) {
-            simulation.entitiesToRemove.add(entity);
-            worldMap.addEntity(new Food(newX, newY));
-        }
-    }
-
-
-    private void moveCreature(Creature creature, Direction direction) {
-        int newX = creature.getX() + direction.dx();
-        int newY = creature.getY() + direction.dy();
-
-        if (newX >= 0 && newX < worldMap.getWidth() && newY >= 0 && newY < worldMap.getHeight()) {
-            encounter(creature, worldMap.getEntityAt(newX, newY), newX, newY);
         }
     }
 }
