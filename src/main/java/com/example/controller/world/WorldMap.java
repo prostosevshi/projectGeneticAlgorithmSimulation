@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 public class WorldMap {
 
-    private static final Logger logger = Logger.getLogger(WorldMap.class.getName());
+    //private static final Logger logger = Logger.getLogger(WorldMap.class.getName());
     private final List<Entity> entities;
 
     private int width;

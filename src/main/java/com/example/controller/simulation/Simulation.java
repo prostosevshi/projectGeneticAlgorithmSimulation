@@ -232,8 +232,21 @@ public class Simulation {
 
             placeCreatureOnMap(creature.getGenome(), 11);
 
-            initializeCreatures(1);
 
+            int[][] mutatedGenome = creature.getGenome();
+
+            int timesMutate = random.nextInt(8);
+            for (int i = 0; i < timesMutate; i++) {
+                int randI = random.nextInt(8);
+                int randJ = random.nextInt(8);
+                int newRandGene = random.nextInt(64);
+
+                mutatedGenome[randI][randJ] = newRandGene;
+            }
+
+            placeCreatureOnMap(mutatedGenome, 1);
+
+            //initializeCreatures(1);
         }
 
         initializeFoodAndPoison(numberOfFood, numberOfPoison);
