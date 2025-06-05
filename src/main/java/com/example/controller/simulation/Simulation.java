@@ -108,6 +108,8 @@ public class Simulation {
     public void increaseSpeed() {
         if (simulationSpeed == 250) {
             simulationSpeed = 100;
+        } else if (simulationSpeed == 100) {
+            simulationSpeed = 1;
         } else if (simulationSpeed > 250) {
             simulationSpeed -= 250;
         }
@@ -121,6 +123,8 @@ public class Simulation {
     public void decreaseSpeed() {
         if (simulationSpeed == 100) {
             simulationSpeed = 250;
+        } else if (simulationSpeed == 1) {
+            simulationSpeed = 100;
         } else simulationSpeed += 250;
         System.out.println("Speed decreased, new delay: " + simulationSpeed + "ms");
         /*TODO pause when too slow
@@ -135,7 +139,7 @@ public class Simulation {
         logger.info("Turn " + turnCounter);
         System.out.println("Turn: " + turnCounter + " Generation: " + genCounter + " Number of creatures alive: " + worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count());
 
-        worldMap.render();
+        //worldMap.render();
 
         List<Entity> currentEntities = new ArrayList<>(worldMap.getEntities());
 
@@ -222,6 +226,8 @@ public class Simulation {
 
         List<Creature> topCreatures = selectTopCreatures(5);
 
+        appendGenomeToFile(topCreatures.getFirst().getGenome(), this.getGeneration(), "top_genomes.txt");
+
         worldMap.getEntities().clear();
         creaturesOfLastGen.clear();
 
@@ -250,6 +256,27 @@ public class Simulation {
         }
 
         initializeFoodAndPoison(numberOfFood, numberOfPoison);
+    }
+
+    private void appendGenomeToFile(int[][] genome, int generation, String filename) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Generation ").append(generation).append(":\n");
+
+        for (int[] row : genome) {
+            for (int gene : row) {
+                sb.append(String.format("%2d ", gene));
+            }
+            sb.append("\n");
+        }
+
+        sb.append("\n");
+
+        try (java.io.FileWriter writer = new java.io.FileWriter(filename, true)) { // true = append
+            writer.write(sb.toString());
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void recordLifetime(List<Entity> entities) {
@@ -376,5 +403,9 @@ public class Simulation {
 
     public int getNumberOfCreaturesAlive() {
         return (int) worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count();
+    }
+
+    public int getGeneration() {
+        return genCounter;
     }
 }

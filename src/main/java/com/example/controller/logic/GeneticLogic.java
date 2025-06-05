@@ -39,7 +39,14 @@ public class GeneticLogic {
                 continue;
             }
 
-            Direction direction = Direction.fromGene(gene);
+            int counterForDirection = (counter + 1) % 64;
+            int iForDirection = counterForDirection / 8;
+            int jForDirection = counterForDirection % 8;
+            int geneForDirection = genome[iForDirection][jForDirection];
+
+            Direction direction = Direction.fromMoveGene(geneForDirection % 8);
+            //Direction direction = Direction.fromGene(gene);
+
             Entity entity = worldMap.getEntityInDirection(creature, direction);
             EntityType entityType = EntityType.fromEntity(entity);
             int offset = entityType.getOffset();
@@ -71,11 +78,11 @@ public class GeneticLogic {
                     creature.setActionCounter(newActionCounter);
                 }
 
-                case TURN -> {
+                /*case TURN -> {
 
                     turn(creature, Direction.fromTurnGene(gene));
                     creature.changeActionCounter(1);
-                }
+                }*/
             }
         }
     }
