@@ -245,7 +245,7 @@ public class Simulation {
             for (int i = 0; i < timesMutate; i++) {
                 int randI = random.nextInt(8);
                 int randJ = random.nextInt(8);
-                int newRandGene = random.nextInt(64);
+                int newRandGene = random.nextInt(64); //changing to 32 for science was 64
 
                 mutatedGenome[randI][randJ] = newRandGene;
             }
@@ -337,7 +337,7 @@ public class Simulation {
             int[][] genome = new int[8][8];
             for (int k = 0; k < 8; k++) {
                 for (int j = 0; j < 8; j++) {
-                    genome[k][j] = random.nextInt(64);  // от 0 до 63
+                    genome[k][j] = random.nextInt(64);  //changing to 32 for science was 64
                 }
             }
             worldMap.addEntity(new Creature(x, y, genome));

@@ -59,10 +59,10 @@ public class Creature extends Entity {
     }
 
     public void setActionCounter(int actionCounter) {
-        this.actionCounter = actionCounter % 64;
+        this.actionCounter = actionCounter % 64; //changing to 32 for science was 64
     }
 
     public void changeActionCounter(int delta) {
-        this.actionCounter = (this.actionCounter + delta) % 64;
+        this.actionCounter = (this.actionCounter + delta) % 64; //changing to 32 for science was 64
     }
 }

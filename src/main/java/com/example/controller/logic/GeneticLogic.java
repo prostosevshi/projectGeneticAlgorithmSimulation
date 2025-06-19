@@ -44,7 +44,7 @@ public class GeneticLogic {
             int jForDirection = counterForDirection % 8;
             int geneForDirection = genome[iForDirection][jForDirection];
 
-            Direction direction = Direction.fromMoveGene(geneForDirection % 8);
+            Direction direction = Direction.fromGene(geneForDirection % 8);
             //Direction direction = Direction.fromGene(gene);
 
             Entity entity = worldMap.getEntityInDirection(creature, direction);
@@ -59,7 +59,6 @@ public class GeneticLogic {
 
             switch (geneType) {
                 case MOVE -> {
-                    //TODO mb add direction from next ac
 
                     moveCreature(creature, direction);
                     creature.setActionCounter(newActionCounter);
@@ -98,27 +97,6 @@ public class GeneticLogic {
 
     private void look(Creature creature, Direction direction) {
     }
-
-    /*private void advanceGenePointer(Creature creature, int i, int j) {
-        int newI = (j == 7) ? i + 1 : i;
-        int newJ = (j == 7) ? 0 : j + 1;
-
-        if (j == 7) {
-            creature.setI(i + 1);
-            creature.setJ(0);
-        } else {
-            creature.setI(i);
-            creature.setJ(j + 1);
-        }
-
-        if (newI >= creature.getGenome().length) {
-            newI = 0;
-            newJ = 0;
-        }
-
-        creature.setI(newI);
-        creature.setJ(newJ);
-    }*/
 
     public void interact(Creature creature, Direction direction) {
         int newX = creature.getX() + direction.dx();

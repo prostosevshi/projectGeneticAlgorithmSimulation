@@ -11,8 +11,8 @@ public enum EntityType {
     NOTHING(2),
     FOOD(3),
     POISON(4),
-    ROCK(5),
-    CREATURE(6);
+    CREATURE(5),
+    ROCK(6);
 
     private final int offset;
 
@@ -28,8 +28,8 @@ public enum EntityType {
         if (entity == null) return EntityType.NOTHING;
         if (entity instanceof Food) return EntityType.FOOD;
         if (entity instanceof Poison) return EntityType.POISON;
-        if (entity instanceof Rock) return EntityType.ROCK;
         if (entity instanceof Creature) return EntityType.CREATURE;
+        if (entity instanceof Rock) return EntityType.ROCK;
         return EntityType.NOTHING;
     }
 }
