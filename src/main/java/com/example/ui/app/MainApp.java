@@ -1,4 +1,5 @@
 package com.example.ui.app;
+import com.example.controller.enums.MapStats;
 import com.example.ui.controller.UIController;
 import com.example.ui.controller.UISimulationController;
 import javafx.application.Application;
@@ -17,11 +18,11 @@ public class MainApp extends Application {
         UISimulationController uiSimulationController = new UISimulationController();
         UIController uiController = new UIController(uiSimulationController);
 
-        Scene scene = new Scene(uiController.getRoot(), 1000, 600);
+        Scene scene = new Scene(uiController.getRoot(), 1100, 600);
         stage.setScene(scene);
         stage.setTitle("Simulation");
         stage.show();
 
-        uiSimulationController.initializeSimulation(40, 20, 80, 80, 64);
+        uiSimulationController.initializeSimulation(MapStats.WIDTH, MapStats.HEIGHT, MapStats.NUMBEROFFOOD, MapStats.NUMBEROFPOISON, MapStats.NUMBEROFCREATURES);
     }
 }

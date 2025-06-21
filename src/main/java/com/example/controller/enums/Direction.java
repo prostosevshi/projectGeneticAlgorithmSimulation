@@ -37,4 +37,14 @@ public enum Direction {
             default -> throw new IllegalArgumentException("Gene " + gene + " does not map to a direction");
         };
     }
+
+    public Direction rotate(int offset) {
+        int newOrdinal = (this.ordinal() + offset) % 8;
+        if (newOrdinal < 0) newOrdinal += 8;
+        return values()[newOrdinal];
+    }
+
+    public Direction getRelativeDirection(int offset) {
+        return rotate(offset);
+    }
 }

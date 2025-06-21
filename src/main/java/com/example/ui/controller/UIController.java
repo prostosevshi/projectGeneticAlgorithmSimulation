@@ -40,7 +40,7 @@ public class UIController {
         this.uiSimulationController = uiSimulationController;
         uiSimulationController.getSimulation().setLifetimeUpdateListener(this::updateLifetimeHistory);
 
-        this.canvas = new Canvas(800, 600);
+        this.canvas = new Canvas(900, 800);
         this.gc = canvas.getGraphicsContext2D();
         startRenderLoop();
         initializeUI();
@@ -58,12 +58,12 @@ public class UIController {
         HBox topInfoBox = new HBox(20, generationLabel, numberOfCreaturesAliveLabel);
         topInfoBox.setAlignment(Pos.CENTER);
         topInfoBox.setStyle("-fx-padding: 10;");
-
         rootPane.setTop(topInfoBox);
 
         StackPane canvasWrapper = new StackPane(canvas);
         canvasWrapper.setStyle("-fx-padding: 10;");
         canvasWrapper.setAlignment(Pos.CENTER);
+
         rootPane.setCenter(canvasWrapper);
 
         //ToolBar toolbar = new ToolBar();
@@ -127,7 +127,6 @@ public class UIController {
         // ======= Настройка размеров =======
         //canvas.widthProperty().bind(rootPane.widthProperty().subtract(20));
         canvas.heightProperty().bind(rootPane.heightProperty().subtract(100));
-
     }
 
     public void updateLifetimeHistory(List<Integer> lifetimes) {

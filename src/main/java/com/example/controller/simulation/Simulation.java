@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class Simulation {
 
@@ -26,6 +27,7 @@ public class Simulation {
     private int simulationSpeed = 1000;
 
     public List<Entity> creaturesOfLastGen = new ArrayList<>();
+    //public List<Entity> top8CreaturesOfLastGen = new ArrayList<>();
     public List<Entity> entitiesToRemove = new ArrayList<>();
     private Consumer<List<Integer>> lifetimeUpdateListener;
 
@@ -136,7 +138,7 @@ public class Simulation {
     private void nextTurn() {
         turnCounter++;
 
-        logger.info("Turn " + turnCounter);
+        //logger.info("Turn " + turnCounter);
         System.out.println("Turn: " + turnCounter + " Generation: " + genCounter + " Number of creatures alive: " + worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count());
 
         //worldMap.render();
@@ -164,13 +166,7 @@ public class Simulation {
 
         addFoodAndPoisonWhenLow();
 
-        for (Entity entity : currentEntities) {
-            if (entity instanceof Creature creature) {
-                creature.setLifetime(creature.getLifetime() + 1);
-            }
-        }
-
-        if (allCreaturesDead()) {
+        if (allCreaturesDead()/*shouldEvolve()*/) {
 
             evolveOnExtinction();
 
@@ -182,6 +178,14 @@ public class Simulation {
 
     public boolean allCreaturesDead() {
         return worldMap.getEntities().stream().noneMatch(e -> e instanceof Creature);
+    }
+
+    public boolean shouldEvolve() {
+        long aliveCreatures = worldMap.getEntities().stream()
+                .filter(e -> e instanceof Creature)
+                .count();
+
+        return aliveCreatures <= 8;
     }
 
     private void removeDeadCreatures() {
@@ -224,7 +228,8 @@ public class Simulation {
 
         recordLifetime(creaturesOfLastGen);
 
-        List<Creature> topCreatures = selectTopCreatures(5);
+        List<Creature> topCreatures = selectTopCreaturesByLifetime(8);
+        //List<Creature> topCreatures = selectTopCreatures(8);
 
         appendGenomeToFile(topCreatures.getFirst().getGenome(), this.getGeneration(), "top_genomes.txt");
 
@@ -233,15 +238,14 @@ public class Simulation {
 
         for (Creature creature : topCreatures) {
 
-            creature.setHealth(10);
-            creature.setLifetime(0);
+            creature.refreshCreature();
 
-            placeCreatureOnMap(creature.getGenome(), 11);
+            placeCreatureOnMap(creature.getGenome(), 7);
 
 
             int[][] mutatedGenome = creature.getGenome();
 
-            int timesMutate = random.nextInt(8);
+            int timesMutate = (random.nextInt(4) + 1);
             for (int i = 0; i < timesMutate; i++) {
                 int randI = random.nextInt(8);
                 int randJ = random.nextInt(8);
@@ -280,12 +284,14 @@ public class Simulation {
     }
 
     public void recordLifetime(List<Entity> entities) {
-        final int lifetime = entities.stream()
+        /*final int lifetime = entities.stream()
                 .filter(entity -> entity instanceof Creature)
                 .map(entity -> (Creature) entity)
                 .mapToInt(Creature::getLifetime)
                 .max()
-                .orElse(0);
+                .orElse(0);*/
+
+        final int lifetime = selectTopCreaturesByLifetime(1).getFirst().getLifetime();
 
         last10Lifetimes.addLast(Math.max(0, lifetime));
         if (last10Lifetimes.size() > 10) {
@@ -297,12 +303,35 @@ public class Simulation {
         }
     }
 
-
     public List<Creature> selectTopCreatures(int topN) {
+        List<Creature> topCreatures = creaturesOfLastGen.stream()
+                .filter(e -> e instanceof Creature)
+                .map(e -> (Creature) e)
+                .collect(Collectors.toList());
+
+        topCreatures.sort((a, b) -> {
+            int scoreA = a.getLifetime() + a.getFoodEaten() * 20;
+            int scoreB = b.getLifetime() + b.getFoodEaten() * 20;
+            return Integer.compare(scoreB, scoreA); // по убыванию
+        });
+
+        return topCreatures.subList(0, Math.min(topN, topCreatures.size()));
+    }
+
+    public List<Creature> selectTopCreaturesByLifetime(int topN) {
         return creaturesOfLastGen.stream()
                 .filter(e -> e instanceof Creature)
                 .map(e -> (Creature) e)
                 .sorted((c1, c2) -> Integer.compare(c2.getLifetime(), c1.getLifetime()))
+                .limit(topN)
+                .toList();
+    }
+
+    public List<Creature> selectTopCreaturesByFoodEaten(int topN) {
+        return creaturesOfLastGen.stream()
+                .filter(e -> e instanceof Creature)
+                .map(e -> (Creature) e)
+                .sorted((c1, c2) -> Integer.compare(c2.getFoodEaten(), c1.getFoodEaten()))
                 .limit(topN)
                 .toList();
     }
@@ -349,8 +378,8 @@ public class Simulation {
         long foodCount = worldMap.getEntities().stream().filter(entity -> entity instanceof Food).count();
         //long creatureCount = worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count();
 
-        if (poisonCount < numberOfPoison / 2) {
-            int poisonToAdd = (int) (numberOfPoison - poisonCount) / 2;
+        if (poisonCount < numberOfPoison /*/ 2*/) {
+            int poisonToAdd = (int) (numberOfPoison - poisonCount) /*/ 2*/;
             initializeFoodAndPoison(0, poisonToAdd);
         }
 

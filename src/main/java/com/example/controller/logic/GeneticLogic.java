@@ -25,77 +25,68 @@ public class GeneticLogic {
         int[][] genome = creature.getGenome();
 
         for (int step = 0; step < 10; step++) {
-            int counter = creature.getActionCounter();
-            int i = counter / 8;
-            int j = counter % 8;
-            int gene = genome[i][j];
 
-            GeneType geneType = GeneType.fromGene(gene);
+            int ip = creature.getActionCounter();
+            int gene = genome[ip / 8][ip % 8];
+            GeneType type = GeneType.fromGene(gene);
 
-            //if turn or look no need for direction
-
-            if (geneType.equals(GeneType.UNKNOWN)) {
+            if (type.equals(GeneType.UNKNOWN)) {
                 creature.changeActionCounter(gene);
                 continue;
             }
 
-            int counterForDirection = (counter + 1) % 64;
-            int iForDirection = counterForDirection / 8;
-            int jForDirection = counterForDirection % 8;
-            int geneForDirection = genome[iForDirection][jForDirection];
-
-            Direction direction = Direction.fromGene(geneForDirection % 8);
-            //Direction direction = Direction.fromGene(gene);
-
+            int dirArgPos = (ip + 1) % 64;
+            int dirArg = genome[dirArgPos / 8][dirArgPos % 8];
+            Direction direction = creature.getDirection().rotate(dirArg % 8);
             Entity entity = worldMap.getEntityInDirection(creature, direction);
             EntityType entityType = EntityType.fromEntity(entity);
             int offset = entityType.getOffset();
 
-            int newCounter = (counter + offset) % 64;
-            int geneFromNewCounter = genome[newCounter / 8][newCounter % 8];
-            int newActionCounter = (counter + geneFromNewCounter) % 64;
+            int jumpAddr = (ip + offset) % 64;
+            int jumpValue = genome[jumpAddr / 8][jumpAddr % 8];
+            int nextIp = (ip + jumpValue) % 64;
 
-            //int direction = (creature.getActionCounter() + 1) % 8;
-
-            switch (geneType) {
+            switch (type) {
                 case MOVE -> {
 
                     moveCreature(creature, direction);
-                    creature.setActionCounter(newActionCounter);
+                    creature.setActionCounter(nextIp);
                     return;
                 }
 
                 case INTERACT -> {
 
                     interact(creature, direction);
-                    creature.setActionCounter(newActionCounter);
+                    creature.setActionCounter(nextIp);
                     return;
                 }
 
                 case LOOK -> {
 
-                    creature.setActionCounter(newActionCounter);
+                    //creature.setLastSeen(entityType);
+                    creature.setActionCounter(nextIp);
                 }
 
-                /*case TURN -> {
-
-                    turn(creature, Direction.fromTurnGene(gene));
+                case TURN -> {
+                    creature.setDirection(creature.getDirection().rotate(dirArg % 8));
                     creature.changeActionCounter(1);
+                }
+
+                /*case JUMP -> {
+                    creature.setActionCounter(nextIp);
+                    return;
+                }*/
+
+                /*case REPRODUCE -> {
+                    if (creature.getHealth() > 20) {
+                        reproduce(creature); // создаёт копию поблизости
+                        creature.changeHealth(-10);
+                    }
+                    creature.setActionCounter(nextIp);
+                    return;
                 }*/
             }
         }
-    }
-
-    private void neutralisePoison(Creature creature, Direction direction) {
-    }
-
-    private void eatFood(Creature creature, Direction direction) {
-    }
-
-    private void turn(Creature creature, Direction direction) {
-    }
-
-    private void look(Creature creature, Direction direction) {
     }
 
     public void interact(Creature creature, Direction direction) {
@@ -106,6 +97,7 @@ public class GeneticLogic {
 
         if (entity instanceof Food) {
             creature.changeHealth(10);
+            creature.changeFoodEaten(1);
             simulation.entitiesToRemove.add(entity);
         } else if (entity instanceof Poison) {
             simulation.entitiesToRemove.add(entity);
@@ -133,6 +125,7 @@ public class GeneticLogic {
 
         if (entity instanceof Food) {
             creature.changeHealth(10);
+            creature.changeFoodEaten(1);
             simulation.entitiesToRemove.add(entity);
             creature.setPosition(newX, newY);
             return;

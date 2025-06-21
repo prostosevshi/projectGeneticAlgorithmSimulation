@@ -1,6 +1,9 @@
 package com.example.ui.controller;
 
+import com.example.controller.enums.MapStats;
 import com.example.controller.simulation.Simulation;
+
+import java.rmi.MarshalledObject;
 
 public class UISimulationController {
 
@@ -45,7 +48,7 @@ public class UISimulationController {
             simulation.resetSimulation();
         }
 
-        initializeSimulation(40, 20, 80, 80, 64);
+        initializeSimulation(MapStats.WIDTH, MapStats.HEIGHT, MapStats.NUMBEROFFOOD, MapStats.NUMBEROFPOISON, MapStats.NUMBEROFCREATURES);
     }
 
     public void increaseSpeed() {
