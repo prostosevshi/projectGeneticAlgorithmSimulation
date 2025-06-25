@@ -9,10 +9,10 @@ import com.example.model.staticEntity.Rock;
 public enum EntityType {
 
     NOTHING(2),
-    FOOD(3),
-    POISON(4),
-    CREATURE(5),
-    ROCK(6);
+    FOOD(4),
+    POISON(5),
+    CREATURE(6),
+    ROCK(3);
 
     private final int offset;
 

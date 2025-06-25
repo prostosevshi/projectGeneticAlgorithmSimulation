@@ -5,7 +5,7 @@ public enum GeneType {
     INTERACT,
     LOOK,
     TURN,
-    JUMP,
+    //JUMP,
     UNKNOWN;
 
     public static GeneType fromGene(int gene) {

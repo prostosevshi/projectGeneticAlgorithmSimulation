@@ -4,6 +4,7 @@ import com.example.model.Entity;
 import com.example.model.creature.Creature;
 import com.example.model.staticEntity.Food;
 import com.example.model.staticEntity.Poison;
+import com.example.model.staticEntity.Rock;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -188,6 +189,10 @@ public class UIController {
                 gc.setFill(Color.GREEN);
             } else if (entity instanceof Poison) {
                 gc.setFill(Color.RED);
+            } else if (entity instanceof Rock) {
+                gc.setFill(Color.GRAY);
+            } else {
+                continue;
             }
 
             gc.fillRect(x * CELL_SIZE + 1, y * CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);

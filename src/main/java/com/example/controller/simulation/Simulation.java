@@ -6,6 +6,7 @@ import com.example.model.creature.Creature;
 import com.example.model.Entity;
 import com.example.model.staticEntity.Food;
 import com.example.model.staticEntity.Poison;
+import com.example.model.staticEntity.Rock;
 import javafx.application.Platform;
 
 import java.util.*;
@@ -236,6 +237,8 @@ public class Simulation {
         worldMap.getEntities().clear();
         creaturesOfLastGen.clear();
 
+        int timesMutate = 2;
+
         for (Creature creature : topCreatures) {
 
             creature.refreshCreature();
@@ -245,7 +248,7 @@ public class Simulation {
 
             int[][] mutatedGenome = creature.getGenome();
 
-            int timesMutate = (random.nextInt(4) + 1);
+            //int timesMutate = (random.nextInt(4) + 1);
             for (int i = 0; i < timesMutate; i++) {
                 int randI = random.nextInt(8);
                 int randJ = random.nextInt(8);
@@ -253,6 +256,7 @@ public class Simulation {
 
                 mutatedGenome[randI][randJ] = newRandGene;
             }
+            timesMutate++;
 
             placeCreatureOnMap(mutatedGenome, 1);
 
@@ -337,11 +341,34 @@ public class Simulation {
     }
 
     public void initializeFoodAndPoison(int numberOfFood, int numberOfPoison) {
+        int width = worldMap.getWidth();
+        int height = worldMap.getHeight();
+
+        //Rocks
+        for (int x = 0; x < width; x++) {
+            worldMap.addEntity(new Rock(x, 0));
+            worldMap.addEntity(new Rock(x, height - 1));
+        }
+        for (int y = 0; y < height; y++) {
+            worldMap.addEntity(new Rock(0, y));
+            worldMap.addEntity(new Rock(width - 1, y));
+        }
+
+        int firstStripeX = worldMap.getWidth() / 4;
+        int secondStripeX = (3 * worldMap.getWidth()) / 4;
+        int halfHeight = worldMap.getHeight() / 2;
+
+        for (int y = 0; y < halfHeight; y++) {
+            worldMap.addEntity(new Rock(firstStripeX, y));                             // сверху вниз
+            worldMap.addEntity(new Rock(secondStripeX, worldMap.getHeight() - 1 - y)); // снизу вверх
+        }
+        //Rocks
+
         for (int i = 0; i < numberOfFood; i++) {
             int x, y;
             do {
-                x = random.nextInt(worldMap.getWidth());
-                y = random.nextInt(worldMap.getHeight());
+                x = random.nextInt(width - 2) + 1;
+                y = random.nextInt(height - 2) + 1;
             } while (worldMap.getEntityAt(x, y) != null);
             worldMap.addEntity(new Food(x, y));
         }
@@ -349,8 +376,8 @@ public class Simulation {
         for (int i = 0; i < numberOfPoison; i++) {
             int x, y;
             do {
-                x = random.nextInt(worldMap.getWidth());
-                y = random.nextInt(worldMap.getHeight());
+                x = random.nextInt(width - 2) + 1;
+                y = random.nextInt(height - 2) + 1;
             } while (worldMap.getEntityAt(x, y) != null);
             worldMap.addEntity(new Poison(x, y));
         }
