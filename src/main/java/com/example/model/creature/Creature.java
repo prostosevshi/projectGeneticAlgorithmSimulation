@@ -1,7 +1,6 @@
 package com.example.model.creature;
 
 import com.example.controller.enums.Direction;
-import com.example.controller.enums.EntityType;
 import com.example.model.Entity;
 
 public class Creature extends Entity {
@@ -11,8 +10,9 @@ public class Creature extends Entity {
     private int lifetime = 0;
     private int foodEaten = 0;
     private int actionCounter = 0;
+    private int evolvesWithoutMutation = 0;
+    private int livesWhenEvolved = 0;
     private Direction direction = Direction.UP;
-    //private EntityType lastSeen = EntityType.NOTHING;
 
     public Creature(int x, int y, int[][] genome) {
         super(x, y);
@@ -79,14 +79,6 @@ public class Creature extends Entity {
         this.direction = direction;
     }
 
-    /*public EntityType getLastSeen() {
-        return lastSeen;
-    }
-
-    public void setLastSeen(EntityType lastSeen) {
-        this.lastSeen = lastSeen;
-    }*/
-
     public int getLifetime() {
         return lifetime;
     }
@@ -105,5 +97,25 @@ public class Creature extends Entity {
 
     public void changeActionCounter(int delta) {
         this.actionCounter = (this.actionCounter + delta) % 64; //changing to 32 for science was 64
+    }
+
+    public int getEvolvesWithoutMutation() {
+        return evolvesWithoutMutation;
+    }
+
+    public void increaseEvolvesWihoutMutation() {
+        this.evolvesWithoutMutation++;
+    }
+
+    public void loseEvolvesWihoutMutation() {
+        this.evolvesWithoutMutation = 0;
+    }
+
+    public int getLivesWhenEvolved() {
+        return livesWhenEvolved;
+    }
+
+    public void setLivesWhenEvolved(int livesWhenEvolved) {
+        this.livesWhenEvolved = livesWhenEvolved;
     }
 }

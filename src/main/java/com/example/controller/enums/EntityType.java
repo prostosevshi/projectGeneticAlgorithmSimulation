@@ -8,11 +8,11 @@ import com.example.model.staticEntity.Rock;
 
 public enum EntityType {
 
-    NOTHING(2),
+    NOTHING(5),
     FOOD(4),
-    POISON(5),
-    CREATURE(6),
-    ROCK(3);
+    POISON(1),
+    CREATURE(2),
+    ROCK(2);
 
     private final int offset;
 

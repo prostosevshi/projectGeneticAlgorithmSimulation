@@ -35,9 +35,10 @@ public class GeneticLogic {
                 continue;
             }
 
-            int acForDir = (ac + 1) % 64;
-            int genForDir = genome[acForDir / 8][acForDir % 8];
+            //int acForDir = (ac + 1) % 64;
+            int genForDir = /*genome[acForDir / 8][acForDir % 8];*/ gene;
             Direction direction = creature.getDirection().rotate(genForDir % 8);
+
             Entity entity = worldMap.getEntityInDirection(creature, direction);
             EntityType entityType = EntityType.fromEntity(entity);
             int offset = entityType.getOffset();
@@ -88,11 +89,6 @@ public class GeneticLogic {
                     creature.setDirection(creature.getDirection().rotate(genForDir % 8));
                     creature.changeActionCounter(1);
                 }
-
-                /*case JUMP -> {
-                    creature.setActionCounter(nextIp);
-                    return;
-                }*/
 
                 /*case REPRODUCE -> {
                     if (creature.getHealth() > 20) {

@@ -36,6 +36,7 @@ public class UIController {
     private Label generationLabel;
     private Label numberOfCreaturesAliveLabel;
     private VBox lifetimeHistoryBox;
+    private VBox top8CreaturesBox;
 
     public UIController(UISimulationController uiSimulationController) {
         this.uiSimulationController = uiSimulationController;
@@ -48,8 +49,6 @@ public class UIController {
     }
 
     private void initializeUI() {
-        /*Button startButton = new Button("Start");
-        startButton.setOnAction(event -> uiSimulationController.startSimulation());*/
 
         rootPane = new BorderPane();
 
@@ -67,9 +66,7 @@ public class UIController {
 
         rootPane.setCenter(canvasWrapper);
 
-        //ToolBar toolbar = new ToolBar();
-        //toolbar.setStyle("-fx-padding: 10; -fx-background-color: transparent;");
-
+        //Buttons
         pauseOrResumeButton = new Button("Start");
         pauseOrResumeButton.setOnAction(event -> togglePause());
 
@@ -90,6 +87,7 @@ public class UIController {
 
         Button changeParametersButton = new Button("Change Parameters");
         changeParametersButton.setOnAction(event -> showParameterDialog());
+        //Buttons
 
         speedLabel = new Label();
         updateSpeedLabel();
@@ -105,6 +103,23 @@ public class UIController {
         rightPane.setStyle("-fx-padding: 10;");
         rootPane.setRight(rightPane);
         //VBOX
+
+        //Top8creatures
+        /*VBox rightContent = new VBox(20);
+
+        Label topLabel = new Label("Top 8 Creatures:");
+        top8CreaturesBox = new VBox(5);
+        top8CreaturesBox.setStyle("-fx-padding: 5;");
+        top8CreaturesBox.setAlignment(Pos.TOP_LEFT);
+
+        rightContent.getChildren().addAll(lifetimeHistoryBox, topLabel, top8CreaturesBox);
+
+        ScrollPane scroll = new ScrollPane(rightContent);
+        scroll.setFitToWidth(true);
+        scroll.setPrefWidth(220);
+
+        rootPane.setRight(scroll);*/
+        //Top8creatures
 
         Region spacerLeft = new Region();
         Region spacerRight = new Region();
@@ -154,7 +169,7 @@ public class UIController {
     }
 
     public void updateGenerationAndAlive() {
-        generationLabel.setText("Generation: " + uiSimulationController.getSimulation().getGenCounter());
+        generationLabel.setText("Generation: " + uiSimulationController.getSimulation().getGeneration());
         numberOfCreaturesAliveLabel.setText("Creatures Alive: " + uiSimulationController.getSimulation().getNumberOfCreaturesAlive());
     }
 

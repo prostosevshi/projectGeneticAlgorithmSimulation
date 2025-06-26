@@ -28,7 +28,7 @@ public class Simulation {
     private int simulationSpeed = 1000;
 
     public List<Entity> creaturesOfLastGen = new ArrayList<>();
-    //public List<Entity> top8CreaturesOfLastGen = new ArrayList<>();
+    private List<Creature> top8Creatures = new ArrayList<>();
     public List<Entity> entitiesToRemove = new ArrayList<>();
     private Consumer<List<Integer>> lifetimeUpdateListener;
 
@@ -230,6 +230,9 @@ public class Simulation {
         recordLifetime(creaturesOfLastGen);
 
         List<Creature> topCreatures = selectTopCreaturesByLifetime(8);
+
+        setTop8Creatures(topCreatures);
+
         //List<Creature> topCreatures = selectTopCreatures(8);
 
         appendGenomeToFile(topCreatures.getFirst().getGenome(), this.getGeneration(), "top_genomes.txt");
@@ -237,14 +240,15 @@ public class Simulation {
         worldMap.getEntities().clear();
         creaturesOfLastGen.clear();
 
-        int timesMutate = 2;
+        int timesMutate = 1;
 
         for (Creature creature : topCreatures) {
 
             creature.refreshCreature();
 
-            placeCreatureOnMap(creature.getGenome(), 7);
-
+            int[][] originalGenome = cloneGenome(creature.getGenome());
+            creature.increaseEvolvesWihoutMutation();
+            placeCreatureOnMap(originalGenome, 7);
 
             int[][] mutatedGenome = creature.getGenome();
 
@@ -258,12 +262,21 @@ public class Simulation {
             }
             timesMutate++;
 
+            creature.loseEvolvesWihoutMutation();
             placeCreatureOnMap(mutatedGenome, 1);
 
             //initializeCreatures(1);
         }
 
         initializeFoodAndPoison(numberOfFood, numberOfPoison);
+    }
+
+    public static int[][] cloneGenome(int[][] genome) {
+        int[][] copy = new int[8][8];
+        for (int i = 0; i < 8; i++) {
+            System.arraycopy(genome[i], 0, copy[i], 0, 8);
+        }
+        return copy;
     }
 
     private void appendGenomeToFile(int[][] genome, int generation, String filename) {
@@ -358,7 +371,7 @@ public class Simulation {
         int secondStripeX = (3 * worldMap.getWidth()) / 4;
         int halfHeight = worldMap.getHeight() / 2;
 
-        for (int y = 0; y < halfHeight; y++) {
+        for (int y = 0; y < halfHeight - 2; y++) {
             worldMap.addEntity(new Rock(firstStripeX, y));                             // сверху вниз
             worldMap.addEntity(new Rock(secondStripeX, worldMap.getHeight() - 1 - y)); // снизу вверх
         }
@@ -390,12 +403,25 @@ public class Simulation {
                 x = random.nextInt(worldMap.getWidth());
                 y = random.nextInt(worldMap.getHeight());
             } while (worldMap.getEntityAt(x, y) != null);
+
             int[][] genome = new int[8][8];
             for (int k = 0; k < 8; k++) {
                 for (int j = 0; j < 8; j++) {
                     genome[k][j] = random.nextInt(64);  //changing to 32 for science was 64
                 }
             }
+
+            /*int[][] genome = {
+                    {17,  9, 1, 61, 1, 1, 26, 57},  // INTERACT → MOVE → TURN → (повтор)
+                    {56, 0, 54, 0, 0, 0, 0, 0},   // То же самое, смещение
+                    {0, 0, 0, 0, 0, 0, 0, 0},     // Зарезервировано под JUMP или REPRODUCE
+                    {0, 0, 0, 0, 0, 0, 0, 0},     // Пусто
+                    {0, 0, 0, 0, 0, 0, 0, 0},     //
+                    {0, 0, 0, 0, 0, 0, 0, 0},     //
+                    {0, 0, 0, 0, 0, 0, 0, 0},     //
+                    {0, 0, 0, 0, 0, 0, 0, 0}      //
+            };*/
+
             worldMap.addEntity(new Creature(x, y, genome));
         }
     }
@@ -453,15 +479,19 @@ public class Simulation {
         return (2.0 - (double) simulationSpeed / 1000);
     }
 
-    public int getGenCounter() {
-        return genCounter;
-    }
-
     public int getNumberOfCreaturesAlive() {
         return (int) worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count();
     }
 
     public int getGeneration() {
         return genCounter;
+    }
+
+    public void setTop8Creatures(List<Creature> top8Creatures) {
+        this.top8Creatures = top8Creatures;
+    }
+
+    public List<Creature> getTop8Creatures() {
+        return top8Creatures;
     }
 }
