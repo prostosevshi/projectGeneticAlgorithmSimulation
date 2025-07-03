@@ -167,7 +167,7 @@ public class Simulation {
 
         addFoodAndPoisonWhenLow();
 
-        if (allCreaturesDead()/*shouldEvolve()*/) {
+        if (/*allCreaturesDead()*/shouldEvolve()) {
 
             evolveOnExtinction();
 
@@ -190,7 +190,7 @@ public class Simulation {
     }
 
     private void removeDeadCreatures() {
-        //List<Entity> toRemove = new ArrayList<>();
+
         for (Entity entity : worldMap.getEntities()) {
             if (entity instanceof Creature creature && creature.getHealth() <= 0) {
                 entitiesToRemove.add(entity);
@@ -231,11 +231,10 @@ public class Simulation {
 
         List<Creature> topCreatures = selectTopCreaturesByLifetime(8);
 
-        setTop8Creatures(topCreatures);
-
-        //List<Creature> topCreatures = selectTopCreatures(8);
+        //setTop8Creatures(topCreatures);
 
         appendGenomeToFile(topCreatures.getFirst().getGenome(), this.getGeneration(), "top_genomes.txt");
+        appendLifetimeToFile(topCreatures.getFirst().getLifetime(), this.getGeneration(), "lifetimes_for_graphics.txt");
 
         worldMap.getEntities().clear();
         creaturesOfLastGen.clear();
@@ -247,12 +246,11 @@ public class Simulation {
             creature.refreshCreature();
 
             int[][] originalGenome = cloneGenome(creature.getGenome());
-            creature.increaseEvolvesWihoutMutation();
+            creature.increaseEvolvesWithoutMutation();
             placeCreatureOnMap(originalGenome, 7);
 
             int[][] mutatedGenome = creature.getGenome();
 
-            //int timesMutate = (random.nextInt(4) + 1);
             for (int i = 0; i < timesMutate; i++) {
                 int randI = random.nextInt(8);
                 int randJ = random.nextInt(8);
@@ -262,10 +260,8 @@ public class Simulation {
             }
             timesMutate++;
 
-            creature.loseEvolvesWihoutMutation();
+            creature.loseEvolvesWithoutMutation();
             placeCreatureOnMap(mutatedGenome, 1);
-
-            //initializeCreatures(1);
         }
 
         initializeFoodAndPoison(numberOfFood, numberOfPoison);
@@ -300,13 +296,17 @@ public class Simulation {
         }
     }
 
+    private void appendLifetimeToFile(int lifetime, int generation, String filename) {
+        String line = String.format("Generation = %d Lifetime = %d\n", generation, lifetime);
+
+        try (java.io.FileWriter writer = new java.io.FileWriter(filename, true)) {
+            writer.write(line);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void recordLifetime(List<Entity> entities) {
-        /*final int lifetime = entities.stream()
-                .filter(entity -> entity instanceof Creature)
-                .map(entity -> (Creature) entity)
-                .mapToInt(Creature::getLifetime)
-                .max()
-                .orElse(0);*/
 
         final int lifetime = selectTopCreaturesByLifetime(1).getFirst().getLifetime();
 
@@ -371,7 +371,7 @@ public class Simulation {
         int secondStripeX = (3 * worldMap.getWidth()) / 4;
         int halfHeight = worldMap.getHeight() / 2;
 
-        for (int y = 0; y < halfHeight - 2; y++) {
+        for (int y = 0; y < halfHeight - 4; y++) {
             worldMap.addEntity(new Rock(firstStripeX, y));                             // сверху вниз
             worldMap.addEntity(new Rock(secondStripeX, worldMap.getHeight() - 1 - y)); // снизу вверх
         }
@@ -412,14 +412,14 @@ public class Simulation {
             }
 
             /*int[][] genome = {
-                    {17,  9, 1, 61, 1, 1, 26, 57},  // INTERACT → MOVE → TURN → (повтор)
-                    {56, 0, 54, 0, 0, 0, 0, 0},   // То же самое, смещение
-                    {0, 0, 0, 0, 0, 0, 0, 0},     // Зарезервировано под JUMP или REPRODUCE
-                    {0, 0, 0, 0, 0, 0, 0, 0},     // Пусто
-                    {0, 0, 0, 0, 0, 0, 0, 0},     //
-                    {0, 0, 0, 0, 0, 0, 0, 0},     //
-                    {0, 0, 0, 0, 0, 0, 0, 0},     //
-                    {0, 0, 0, 0, 0, 0, 0, 0}      //
+                    {38, 21, 40, 18, 39, 59, 48, 63},
+                    {37, 24, 32, 47,  7,  8,  2, 61},
+                    {43, 41,  8, 22, 14, 28, 57, 61},
+                    {6, 56, 34, 45, 49, 16, 12, 30},
+                    {26, 61, 49, 27, 30, 35, 0, 58},
+                    {58, 15, 62, 6, 52, 53, 50, 27},
+                    {13, 42, 54, 51, 60, 9, 5, 58},
+                    {34, 25, 61, 41, 59, 14, 43, 22}
             };*/
 
             worldMap.addEntity(new Creature(x, y, genome));
@@ -429,15 +429,15 @@ public class Simulation {
     public void addFoodAndPoisonWhenLow() {
         long poisonCount = worldMap.getEntities().stream().filter(entity -> entity instanceof Poison).count();
         long foodCount = worldMap.getEntities().stream().filter(entity -> entity instanceof Food).count();
-        //long creatureCount = worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count();
+        long creatureCount = worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count();
 
-        if (poisonCount < numberOfPoison /*/ 2*/) {
-            int poisonToAdd = (int) (numberOfPoison - poisonCount) /*/ 2*/;
+        if (poisonCount < numberOfPoison) {
+            int poisonToAdd = (int) (numberOfPoison - poisonCount);
             initializeFoodAndPoison(0, poisonToAdd);
         }
 
-        if (foodCount < numberOfFood) {
-            int foodToAdd = (int) (numberOfFood - foodCount);
+        if (foodCount < numberOfFood + numberOfCreatures - creatureCount) {
+            int foodToAdd = (int) (numberOfFood - foodCount + numberOfCreatures - creatureCount);
             initializeFoodAndPoison(foodToAdd, 0);
         }
     }
@@ -480,18 +480,23 @@ public class Simulation {
     }
 
     public int getNumberOfCreaturesAlive() {
-        return (int) worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count();
+        List<Entity> snapshot = new ArrayList<>(worldMap.getEntities());
+        long count = snapshot.stream()
+                .filter(e -> e instanceof Creature)
+                .count();
+        return (int) count;
+        //return (int) worldMap.getEntities().stream().filter(entity -> entity instanceof Creature).count();
     }
 
     public int getGeneration() {
         return genCounter;
     }
 
-    public void setTop8Creatures(List<Creature> top8Creatures) {
+    /*public void setTop8Creatures(List<Creature> top8Creatures) {
         this.top8Creatures = top8Creatures;
     }
 
     public List<Creature> getTop8Creatures() {
         return top8Creatures;
-    }
+    }*/
 }

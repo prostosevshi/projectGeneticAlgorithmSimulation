@@ -43,8 +43,4 @@ public enum Direction {
         if (newOrdinal < 0) newOrdinal += 8;
         return values()[newOrdinal];
     }
-
-    public Direction getRelativeDirection(int offset) {
-        return rotate(offset);
-    }
 }
