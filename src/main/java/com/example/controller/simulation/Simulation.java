@@ -368,12 +368,16 @@ public class Simulation {
         }
 
         int firstStripeX = worldMap.getWidth() / 4;
-        int secondStripeX = (3 * worldMap.getWidth()) / 4;
+        //int secondStripeX = (3 * worldMap.getWidth()) / 4;
+        int centerStripeX = worldMap.getWidth() / 2;
         int halfHeight = worldMap.getHeight() / 2;
 
         for (int y = 0; y < halfHeight - 4; y++) {
             worldMap.addEntity(new Rock(firstStripeX, y));                             // сверху вниз
-            worldMap.addEntity(new Rock(secondStripeX, worldMap.getHeight() - 1 - y)); // снизу вверх
+            //worldMap.addEntity(new Rock(secondStripeX, worldMap.getHeight() - 1 - y)); // снизу вверх
+        }
+        for (int y = 8; y < 16; y++) {
+            worldMap.addEntity(new Rock(centerStripeX, y));
         }
         //Rocks
 
@@ -407,7 +411,7 @@ public class Simulation {
             int[][] genome = new int[8][8];
             for (int k = 0; k < 8; k++) {
                 for (int j = 0; j < 8; j++) {
-                    genome[k][j] = random.nextInt(64);  //changing to 32 for science was 64
+                    genome[k][j] = random.nextInt(64);
                 }
             }
 
