@@ -40,3 +40,5 @@ Each generation develops its own survival strategy, passed to descendants with m
     - `simulation` — core logic and controller
     - `model` — entities (creatures, food, poison)
     - `ui` — graphical interface (main view, control panel, stats panel)  
+
+![2025-07-09 17-08-24 (online-video-cutter com)](https://github.com/user-attachments/assets/a05e0f26-c436-4588-b7ca-c42092e01531)
